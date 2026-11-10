@@ -137,6 +137,10 @@ On `dev`, since 0.4.0-beta.
   shows as the game's own pointer, except where the screen draws its own cursor (`hide_pointer`, #399). Screens draw
   shapes, text in the game's fonts, pictures and a blurred copy of the game's frame, on Direct3D 11 and 12, in SDR
   and HDR ([screens over the game](docs/modding/overlay.md)).
+- **Vehicles with a model of their own.** A unit copy's `mesh` takes `"parts": true`: each object of the OBJ rides the
+  unit joint it is named after, so a vehicle's wheels steer and turn under a body of the mod's own. The copy keeps its
+  base's joints, so seats, damage zones and the gun mount still fit. The `vehicle-model` example is an M-102 under a
+  body of boxes ([new vehicles](docs/modding/vehicles.md)).
 - **New vehicles as copies of vanilla ones.** The `vehicle-variants` example adds the EXO-45H Heavy Patriot (a quicker
   turn and a 2000-round machine gun) and the M-102R Rally FRV (quicker steering), each called in by a Pelican drop
   stratagem of its own. A ground vehicle ignores `model_from`, since its seats, wheels, tracks and damage zones name

@@ -46,6 +46,7 @@ The modding guide, in reading order:
    mod's own.
    [New enemies](modding/enemies.md): enemies with roster rows and squads of their own, and replacement rules.
    [Patterns](modding/patterns.md): patterns of a mod's own for weapons, vehicles, the hellpod and the Pelican.
+   [New vehicles](modding/vehicles.md): vehicles as copies of vanilla ones, with stats and models of their own.
    [Warbonds](modding/warbonds.md): warbonds of a mod's own, selling game items and its weapons and stratagems.
 7. [Logic at run time](modding/runtime.md): events, actions, live edits and the game thread.
 8. [Hooks and game memory](modding/hooks.md): hooking game functions and reading and patching memory where the SDK has
