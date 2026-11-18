@@ -174,4 +174,3 @@ frame the button is drawn, with the button's box in units.
 The game is kept from the press in its window messages, its raw input and `GetKeyState` / `GetAsyncKeyState`. A box
 lasts until the screen's next frame, so a closed screen takes no clicks. All screens together have up to 32 boxes.
 Hosts older than `take_clicks` end `HfDraw` at `hide_pointer`, so check `size` before calling it.
-
