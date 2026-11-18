@@ -503,6 +503,10 @@ On `dev`, since 0.4.0-beta.
 
 ### For mod makers
 
+- **SDK 21: effects on entities, enemies near a point and the armory's weapon.** `play_effect` hangs particles on
+  an entity's node, and with `HF_EFFECT_SHARED` every machine of the lobby plays them too, as a Coolant Pack's steam.
+  `find_enemies` lists the living enemies within a radius, nearest first, with health and faction. `armory_weapon`
+  gives the weapon the customize screen shows ([world calls](docs/modding/world.md)) (#4).
 - **An added weapon's armory traits can be set.** `hf_record` and `hf_set` on `LoadoutEntry` reach the weapon's own
   loadout entry, so its trait labels (armour penetration, Explosive, Stun...) change for that weapon only. Before, both
   found no record ([what it shares](docs/modding/content.md#what-it-shares)) (#1).
