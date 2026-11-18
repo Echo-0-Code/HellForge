@@ -1,0 +1,38 @@
+# Echo-0-Code's test builds of the customize-list-watch branch: the package, as the nightly builds it, for a tester to
+# install. Only on that branch; it goes before the branch's pull request.
+name: Test build
+
+on:
+  push:
+    branches: [customize-list-watch]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build the package
+    runs-on: windows-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/build-tools
+        with:
+          native: 'true'
+      - name: scripts/Package-HellForge.ps1
+        shell: pwsh
+        run: |
+          $env:TEMP = $env:TMP = (New-Item -ItemType Directory -Force (Join-Path $env:GITHUB_WORKSPACE 'artifacts/tmp')).FullName
+          ./scripts/Package-HellForge.ps1 -SteamExports data/steam-export-manifest.json
+          exit 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: test-package
+          path: |
+            artifacts/package/HellForge-Setup.exe
+            native/**/hellforge_modloader.dll
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
