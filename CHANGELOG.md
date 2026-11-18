@@ -12,9 +12,12 @@ On `dev`, since 0.4.0-beta.
 
 ### Added
 
+- **Buttons over game menus.** A screen that is not modal can take the mouse's clicks inside its own boxes with the
+  new `HfDraw.take_clicks`, so a mod's button can sit on the armory. The game gets neither the press nor its release;
+  everything else still reaches it (#2, [overlay](docs/modding/overlay.md#click-boxes)).
 - **Skinned models bend.** A mod model's skinned glTF mesh keeps up to four weighted joints per vertex, in the
   game's own skinned layout, so belts, straps and cables bend between joints as clips move them
-  ([models](docs/modding/models.md#meshes-lods-and-shadows)). Models without weights build as before.
+  (#3, [models](docs/modding/models.md#meshes-lods-and-shadows)). Models without weights build as before.
 - **Missile spread in the editor.** Every seeking missile's page has a Spread group: whether its missiles veer off
   their launch line, how far and which way, the curve they fly after, and how fast they swing back onto the target.
   The W.A.S.P., the Missile Pistol and the Warrant have it on; the Spear, the Commando and the others can turn it on.
@@ -500,6 +503,9 @@ On `dev`, since 0.4.0-beta.
 
 ### For mod makers
 
+- **An added weapon's armory traits can be set.** `hf_record` and `hf_set` on `LoadoutEntry` reach the weapon's own
+  loadout entry, so its trait labels (armour penetration, Explosive, Stun...) change for that weapon only. Before, both
+  found no record ([what it shares](docs/modding/content.md#what-it-shares)) (#1).
 - **`modloader.log` follows edits that wait for their tables.** The "deferred edits" line names the tables the waiting
   edits wait for, and a later line says when they apply. The count waiting at first differs between PCs, as the tables
   load at different times. Before, nothing said that they applied later (#352).
