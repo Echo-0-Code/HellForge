@@ -62,6 +62,8 @@ Reference and related pages:
   game's styles, set from code, with click handlers.
 - [Screens over the game](modding/overlay.md): for code mod authors; the SDK 17 screens, what each drawing call does,
   the input, the backdrop and the overlay host.
+- [Effects, enemies and the armory](modding/world.md): for code mod authors; SDK 21 particle effects on entities,
+  shared across the lobby, enemies near a point and the weapon on the armory's customize screen.
 - [Building a lobby browser](lobby-browser.md): for front-end developers drawing their own lobby browser on the ship's
   terminal; the SDK 16 calls, the terminal's visit, what each lobby says and the rules a browser keeps.
 
@@ -76,6 +78,8 @@ Reference and related pages:
   which game tables move or grow, and what each part of the level changes.
 - [Stats, live editing and events](internals-live.md): the stats pass at load, live editing, the in-game editor and live
   pipe, event sources and native edits.
+- [How the world calls work](internals-world.md): what the SDK 21 effect, enemy and armory calls read and call in
+  the engine, and how a shared effect reaches the other machines.
 - [Performance fixes in the engine](performance.md): what the mod loader changes so the game and HellForge do less
   work, and how to turn a fix off.
 - [Performance fixes in level generation](performance-loading.md): the fixes that make the game's level generation
