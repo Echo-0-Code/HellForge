@@ -55,4 +55,5 @@ typedef struct HfFoundEnemy
 #define HF_FOUND_AUTHORITY 0x2u /* this machine simulates it (is_authority) */
 
 /* armory_weapon's menu: the menu state the game shows. */
+#define HF_MENU_ARMORY 2u     /* the Armory: its weapon tabs' grids, with CUSTOMIZE and EQUIP */
 #define HF_MENU_CUSTOMIZE 33u /* the armory's customize screen of one weapon */

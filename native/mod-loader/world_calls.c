@@ -42,6 +42,12 @@ typedef uint8_t (*WcCanGetFn)(uint64_t type, uint64_t name);
 static const ActPin kWcWorldPins[] = {{0, 0x6541AFu, "488b0d8a21cd02488b89e8100000"}, {0, 0x65417Au, "488b058721cd02"}};
 static const ActPin kWcMenuPins[] = {{0, 0x1495282u, "488b15af7bfe01"}, {0, 0x14964F5u, "4c8ba758010000"}, {0, 0x149382Fu, "41895710"},
     {0, 0x14966C4u, "f5644901"}, {0, 0x14954D1u, "ffcb83fb21"}};
+/* The Armory's selection (state 2, menu +0x60): its item list at +0x7FDE8, which CUSTOMIZE turns into a loadout id at
+ * 0x1458192 through 0x18D2270: the selected category and index (+0x928E8, +0x928EC), the categories' counts (+0x92318,
+ * how many at +0x91F14) and the ids (+0x92990), as the game reads them. */
+static const ActPin kWcArmoryPins[] = {{0, 0x14ACA13u, "488b4960"}, {0, 0x1458192u, "448b8fd4261100"}, {0, 0x145819Eu, "448b87d0261100"},
+    {0, 0x14581A5u, "488d8fe8fd0700"}, {0, 0x18D240Cu, "448b89ec280900"}, {0, 0x18D2416u, "448b81e8280900"},
+    {0, 0x18D227Cu, "443b81141f09"}, {0, 0x18D22F0u, "8b848718230900"}, {0, 0x18D2301u, "8b8c8790290900"}};
 static const ActPin kWcFactionPins[] = {{0, 0xBB2A2u, "488b3d0fba2603"}};
 
 static int g_wcState;              /* 0 not checked, 1 every slot as reviewed, -1 not */
@@ -368,18 +374,47 @@ static uint32_t ApiFindEnemies(HfMod* mod, const float centre[3], float radius, 
 
 /* ---- armory_weapon ------------------------------------------------------------------------------------------------ */
 
-/* SDK 21, armory_weapon: the customize screen's weapon (its loadout id), 0 while that screen is not on top. */
+#define WC_ARMORY_SCREEN 0x60u
+#define WC_ARMORY_LIST 0x7FDE8u
+#define WC_LIST_CATEGORIES 0x91F14u
+#define WC_LIST_COUNTS 0x92318u
+#define WC_LIST_IDS 0x92990u
+#define WC_LIST_SELECTED 0x928E8u /* the category, then the index in it (-1: none) */
+#define WC_LIST_MAX 4096u
+
+/* The loadout id the Armory's CUSTOMIZE would open: its selected item, found as the game finds it; 0 for none. */
+static uint32_t WcArmorySelected(uintptr_t object)
+{
+    uintptr_t screen;
+    if (!EvpPtr(object + WC_ARMORY_SCREEN, &screen)) return 0;
+    uintptr_t list = screen + WC_ARMORY_LIST;
+    uint32_t category = EvpU32(list + WC_LIST_SELECTED, ~0u), index = EvpU32(list + WC_LIST_SELECTED + 4, ~0u);
+    if (index >= WC_LIST_MAX || category >= EvpU32(list + WC_LIST_CATEGORIES, 0) || category >= 64) return 0;
+    for (uint32_t k = 0; k < category; k++) index += EvpU32(list + WC_LIST_COUNTS + 4 * k, WC_LIST_MAX);
+    return index < WC_LIST_MAX ? EvpU32(list + WC_LIST_IDS + 4 * index, 0) : 0;
+}
+
+/* Checks the pins once: *state 1 as reviewed, -1 not. */
+static void WcProve(uintptr_t game, int* state, const ActPin* pins, size_t count)
+{
+    if (*state == 0) *state = ActPins(game, pins, count) ? 1 : -1;
+}
+
+/* SDK 21, armory_weapon: the weapon of the customize screen or the item selected in the Armory; 0 on any other menu.
+ * Each screen's reads are proven apart, so one that moved in an update leaves the other working. */
 static uint32_t ApiArmoryWeapon(HfMod* mod, uint32_t* menu)
 {
     (void)mod;
-    static int proven;
+    static int customize, armory;
     uintptr_t game = ApiModuleBase("game.dll", NULL), object, screen;
     if (menu) *menu = 0;
     if (!game) return 0;
-    if (proven == 0) proven = ActPins(game, kWcMenuPins, sizeof kWcMenuPins / sizeof kWcMenuPins[0]) ? 1 : -1;
-    if (proven < 0 || !EvpPtr(game + WC_MENU, &object)) return 0;
+    WcProve(game, &customize, kWcMenuPins, sizeof kWcMenuPins / sizeof kWcMenuPins[0]);
+    WcProve(game, &armory, kWcArmoryPins, sizeof kWcArmoryPins / sizeof kWcArmoryPins[0]);
+    if (customize < 0 || !EvpPtr(game + WC_MENU, &object)) return 0;
     uint32_t state = EvpU32(object, 0);
     if (menu) *menu = state;
+    if (state == HF_MENU_ARMORY) return armory > 0 ? WcArmorySelected(object) : 0;
     if (state != HF_MENU_CUSTOMIZE || !EvpPtr(object + WC_MENU_SCREEN, &screen)) return 0;
     return EvpU32(screen + WC_SCREEN_WEAPON, 0);
 }

@@ -1721,8 +1721,9 @@ typedef struct HfApi
      * were written. An enemy is on a faction that is not the Helldivers' side, or of an enemy type when it has no
      * faction. Any thread, in a mission; it reads every health record, so ask a few times a second at most. */
     uint32_t (*find_enemies)(HfMod* mod, const float centre[3], float radius, HfFoundEnemy* out, uint32_t capacity);
-    /* The loadout id of the weapon the armory's customize screen shows, 0 while that screen is not the menu on top.
-     * menu (may be NULL) gets the menu state on top (HF_MENU_CUSTOMIZE for that screen, 0 when none reads). Any thread. */
+    /* The loadout id of the weapon the armory's customize screen shows, or of the item selected in the Armory's grid
+     * (HF_MENU_ARMORY; on its armour tabs, the armour piece's id); 0 on any other menu or with nothing selected. menu
+     * (may be NULL) gets the menu state on top (HF_MENU_ARMORY, HF_MENU_CUSTOMIZE, 0 when none reads). Any thread. */
     uint32_t (*armory_weapon)(HfMod* mod, uint32_t* menu);
 } HfApi;
 

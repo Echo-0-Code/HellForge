@@ -94,15 +94,23 @@ few times a second at most, not every frame.
 
 ## The weapon in the armory
 
-`armory_weapon` gives the loadout id (`HF_ITEM_...`) of the weapon on the armory's customize screen. It answers 0
-while another menu is on top. Its `menu` argument, which may be `NULL`, gets the menu state on top:
+`armory_weapon` gives the loadout id (`HF_ITEM_...`) of the weapon the armory works on. It reads two screens:
+
+| `menu` | Screen | The id |
+| --- | --- | --- |
+| `HF_MENU_ARMORY` | the Armory's grid, with CUSTOMIZE and EQUIP | the item selected in it, the one CUSTOMIZE would open |
+| `HF_MENU_CUSTOMIZE` | the customize screen of one weapon | the weapon it shows |
+
+On any other menu, or with nothing selected, it answers 0. On the Armory's armour tabs the id is the armour piece's.
+Its `menu` argument, which may be `NULL`, gets the menu state on top:
 
 ```c
 uint32_t menu = 0, weapon = hf->armory_weapon(mod, &menu);
-if (menu == HF_MENU_CUSTOMIZE && weapon == HF_ITEM_AR23_LIBERATOR) hf->set_status(mod, "Liberator on the bench");
+if (menu == HF_MENU_ARMORY && weapon == HF_ITEM_AR23_LIBERATOR) hf->set_status(mod, "Liberator selected");
 ```
 
-Call it again whenever you need it: the screen changes weapon without telling your mod.
+Call it again whenever you need it: the screens change weapon without telling your mod. The Armory's answer follows a
+click or the gamepad's selection, not the mouse hovering over an item.
 
 ## Limits
 
