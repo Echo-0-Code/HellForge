@@ -79,9 +79,9 @@ public sealed partial class RegisteredItems(string path)
     // A pattern as this session serves it: the weapons its children go on, or a unit pattern's catalogue item.
     public sealed record PatternPlan(ModPattern Pattern, IReadOnlyList<uint> Weapons, uint UnitMixId = 0);
 
-    // Mods' patterns a weapon takes: its customize screen holds 64 entries over five slots (0x1493770), the fullest vanilla
-    // weapon lists 38, and mods' attachments need room too.
-    public const int PatternsPerWeapon = 16;
+    // Mods' patterns a weapon takes: the mod loader's customize screen list holds 127 entries over five slots
+    // (customize_list.c), the fullest vanilla weapon lists 38, and the paint slot's 64 cards hold about 12 vanilla paints.
+    public const int PatternsPerWeapon = 48;
 
     // The file's "patterns" (none in an older file).
     public static List<ModPattern> Patterns(byte[] file)
