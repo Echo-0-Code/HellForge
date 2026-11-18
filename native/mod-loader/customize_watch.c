@@ -8,7 +8,7 @@
 #define CW_CLOSE 0x1493100u    /* the screen's tear-down: S+0x8e8cf8 = 0 */
 #define CW_LIST 8u             /* the list, from S */
 #define CW_LIST_END 0x660u     /* S+0x660: the screen's UI */
-#define CW_HITS 1024
+#define CW_HITS 2048
 #define CW_GUARD_MS 600000u    /* a screen is watched ten minutes at most */
 static const uint8_t kCwBuildPin[] = {0x40, 0x53, 0x41, 0x56, 0x41, 0x57, 0x48, 0x81, 0xEC, 0x20, 0x01, 0x00, 0x00};
 static const uint8_t kCwClosePin[] = {0x48, 0x89, 0x5C, 0x24, 0x08, 0x48, 0x89, 0x6C, 0x24, 0x10};
@@ -19,7 +19,7 @@ static CwBuildFn g_cwBuild;
 static CwCloseFn g_cwClose;
 static int g_cwState; /* 0 not yet, 1 hooked, -1 off or failed */
 static uintptr_t g_cwGame;
-static struct { uint64_t rip; uint32_t offset, write; } g_cwHits[CW_HITS];
+static struct { uint64_t rip; uint32_t offset, last, write; } g_cwHits[CW_HITS]; /* first and highest offset */
 static volatile LONG g_cwHitCount;
 static LONG g_cwNoted;
 static volatile uintptr_t g_cwFrom, g_cwTo, g_cwPageFrom, g_cwPageTo; /* the list, its pages; 0 when none is watched */
@@ -30,14 +30,23 @@ static int g_cwOpened;
 static struct { uint32_t weapon, items, entries; } g_cwBuilt[64];
 static volatile LONG g_cwBuiltCount;
 static LONG g_cwBuiltNoted;
+static volatile LONG g_cwReachDue; /* a screen closed: note each instruction's reach */
 
+/* One line per instruction: the first offset it touched; a higher one later is noted again (a loop's reach). */
 static void CwRecord(uintptr_t address, uint64_t rip, uint32_t write)
 {
+    uint32_t offset = (uint32_t)(address - g_cwFrom);
     LONG count = g_cwHitCount;
+    for (LONG i = 0; i < count; i++)
+        if (g_cwHits[i].rip == rip)
+        {
+            if (offset > g_cwHits[i].last) g_cwHits[i].last = offset;
+            g_cwHits[i].write |= write;
+            return;
+        }
     if (count >= CW_HITS) return;
-    for (LONG i = 0; i < count; i++) if (g_cwHits[i].rip == rip && g_cwHits[i].offset == (uint32_t)(address - g_cwFrom)) return;
     g_cwHits[count].rip = rip;
-    g_cwHits[count].offset = (uint32_t)(address - g_cwFrom);
+    g_cwHits[count].offset = g_cwHits[count].last = offset;
     g_cwHits[count].write = write;
     InterlockedIncrement(&g_cwHitCount);
 }
@@ -119,7 +128,7 @@ static void CwBuildDetour(uint8_t* screen, const uint32_t* weapon)
 
 static void CwCloseDetour(uint8_t* screen)
 {
-    if (g_cwFrom == (uintptr_t)screen + CW_LIST) CwUnguard();
+    if (g_cwFrom == (uintptr_t)screen + CW_LIST) { CwUnguard(); g_cwReachDue = 1; }
     g_cwClose(screen);
 }
 
@@ -153,6 +162,14 @@ static void CustomizeWatchInstall(void)
     Note("customize watch: on (HELLFORGE_CUSTOMIZE_WATCH=1); each instruction that touches a customize screen's list is noted once");
 }
 
+static void CwNoteReach(void)
+{
+    for (LONG i = 0; i < g_cwHitCount && i < CW_HITS; i++)
+        if (g_cwHits[i].last != g_cwHits[i].offset)
+            Note("customize watch: game.dll+0x%llx reached list+0x%03x..0x%03x%s", (unsigned long long)(g_cwHits[i].rip - g_cwGame),
+                g_cwHits[i].offset, g_cwHits[i].last, g_cwHits[i].write ? " (writes)" : "");
+}
+
 static void CwNoteHit(LONG i)
 {
     uint64_t rip = g_cwHits[i].rip;
@@ -171,9 +188,11 @@ static void CustomizeWatchReport(void)
     {
         CwUnguard();
         Note("customize watch: ten minutes on one screen; this screen is no longer watched");
+        CwNoteReach();
     }
     for (LONG n = g_cwBuiltCount; g_cwBuiltNoted < n; g_cwBuiltNoted++)
         Note("customize watch: built the list of weapon %u: %u items, %u entries of 64", g_cwBuilt[g_cwBuiltNoted].weapon,
             g_cwBuilt[g_cwBuiltNoted].items, g_cwBuilt[g_cwBuiltNoted].entries);
     for (LONG n = g_cwHitCount; g_cwNoted < n && g_cwNoted < CW_HITS; g_cwNoted++) CwNoteHit(g_cwNoted);
+    if (InterlockedExchange(&g_cwReachDue, 0)) CwNoteReach();
 }
