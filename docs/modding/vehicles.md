@@ -126,10 +126,52 @@ hf->add_stratagem(mod, &s);
 
 The drop loads the package of its first payload entity, your vehicle's.
 
+## Moving seats and joints
+
+A unit copy's `joints` moves joints of the copy to new rest positions, in the unit's own space (metres, +X right, +Y
+forward, +Z up). Name a joint by its name, or by `#` and its 8-digit name hash for one the game names only by hash.
+Every joint below a moved one moves with it, and so do physics actors and interact zones riding it.
+
+```json
+{ "type": "unit", "copy": "0xCC21C7FFD3EBEFB9", "name": "yourname/your_mod/quad",
+  "joints": { "attach_driver": [0, 0.1, 0.75], "interact_driver": [-0.9, 0.1, 0.3], "steering_wheel": [0, 0.5, 1.0] } }
+```
+
+A seat is two joints: where the player sits (`attach_driver` and its passengers) and where they get in (the interact
+zone's joint, `interact_driver` and its passengers). The M-102's are:
+
+| Seat | Sits at | Gets in at | Zone |
+|---|---|---|---|
+| driver | `attach_driver` (-0.36, 0.60, 0.60) | `interact_driver` (-1.76, 0.60, 0.23) | 3 |
+| front passenger | `#b8d4b9d0` (0.36, 0.60, 0.60) | `#2b131d4f` (1.76, 0.60) | 4 |
+| rear left | `#cf12eb4f` (-0.36, -0.21, 0.60) | `#b10b8ce4` (-1.76, -0.21) | 0 |
+| rear right | `#46540ee8` (0.36, -0.21, 0.60) | `#02e8c349` (1.76, -0.21) | 1 |
+| roof gunner | the gun mount | `#1bec92c7` (0, -2.75, 0.39) | 2 |
+
+`Interactable`'s `zoneN_joint` and `zoneN_offset_x/y/z` also set where a zone sits, per entity. The animations a
+seated player plays stay the base's, so a seat moved far from where it was may look off.
+
+## Physics of its own
+
+A unit copy gets its base's physics (collision, mass and wheels) under its own name. Its `physics` changes that, in
+one of two ways:
+
+- `{"file": "physics/quad.physics"}`: a whole physics resource from the mod folder. It must have been made from the
+  copy's base (the unit at +0x08 is the base's), and HellForge renames it to the copy.
+- `{"bytes": [{"at": "0x58", "expect": "00000000", "set": "0000803F"}]}`: byte edits on the copy of the base's
+  physics, each checked against what the base holds there, as a `replace` is.
+
+The physics resource's layout (actors, shapes, Havok shape data and the wheel table) is in the project's vehicle
+findings. A mod that brings its own physics is marked as unchecked for mod sync.
+
+`Vehicle`'s `wheelN_joint_a`, `wheelN_steering_joint`, `wheelN_rotation_joint` and `wheelN_joint_d` name the joints that
+physics wheel N turns. The FRV's wheels are, in order, left rear, right rear, left front, right front. A vehicle with
+fewer wheels in its physics (a motorbike's two) names the joints of its own.
+
 ## What stays the base's
 
-- Physics and collision, and so how it drives: the drivetrain is in the physics resource.
-- Animations, where players sit, the camera, and the HUD. A seat can be closed, not moved or added.
+- The drivetrain, unless the copy brings physics of its own.
+- Animations, the camera, and the HUD. A seat can be moved or closed, not added.
 - Damage zones and where they are.
 - Room: the game's vehicle tables have space for about 3 new tracked vehicles and 13 ground vehicles in all.
 

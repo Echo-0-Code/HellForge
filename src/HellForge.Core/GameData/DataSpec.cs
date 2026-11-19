@@ -34,7 +34,13 @@ public abstract record DataResource(string Where)
 }
 public sealed record CopyResource(string Where, ulong Type, ulong From, string Name, IReadOnlyDictionary<int, ulong> Expect,
     IReadOnlyList<Replacement> Replace, CurveEdit? Curves, IReadOnlyDictionary<uint, double[]>? Colours, ResourceEdits.LutRecolour? Lut, MeshFile? Mesh = null,
-    IReadOnlyDictionary<uint, ulong>? Textures = null, IReadOnlyList<ShaderFile>? Shaders = null) : DataResource(Where);
+    IReadOnlyDictionary<uint, ulong>? Textures = null, IReadOnlyList<ShaderFile>? Shaders = null) : DataResource(Where)
+{
+    // A unit copy's own physics instead of its base's (UnitJoints.cs PhysicsSpec), and joints moved to new rest
+    // positions in the unit's space, by name ("#" and the hash for a joint the game names only by hash).
+    public PhysicsSpec? Physics { get; init; }
+    public IReadOnlyDictionary<string, double[]>? Joints { get; init; }
+}
 // A unit copy's own geometry: an OBJ in the mod folder (UnitMesh), scaled, Y-up or the game's Z-up; with UnitSpace its
 // coordinates are the unit's own (the frame its joints and attach points are in), otherwise its render mesh's.
 // With Parts, each object of the OBJ rides the unit joint it is named after, in the unit's own space (UnitMesh).
@@ -114,6 +120,8 @@ public static partial class DataSpecs
                     return $"{copy.Where} copies a {ResourceTypes.Describe(copy.Type)} resource";
                 case CopyResource copy when copy.Replace.Count > 0:
                     return $"{copy.Where} replaces values (\"replace\")";
+                case CopyResource { Physics: not null } copy:
+                    return $"{copy.Where} brings its own physics";
                 case CopyResource { Shaders.Count: > 0 } copy:
                     return $"{copy.Where} brings its own shader code";
                 case ShaderResource shader:
@@ -349,7 +357,7 @@ public static partial class DataSpecs
     // A copy, its edits read in the spec's order.
     static CopyResource ReadCopy(JsonElement e, string at, string? folder, ISet<string> inputs)
     {
-        Fields(e, at, "type", "copy", "name", "expect", "replace", "curves", "colours", "textures", "lut", "mesh", "shader", "source");
+        Fields(e, at, "type", "copy", "name", "expect", "replace", "curves", "colours", "textures", "lut", "mesh", "shader", "source", "physics", "joints");
         var type = Type(e, at);
         var expect = ReadExpect(e, at);
         var replace = ReadReplace(e, at);
@@ -360,7 +368,10 @@ public static partial class DataSpecs
         var mesh = ReadMesh(e, at, type, folder, inputs);
         var shaders = ReadShaders(e, at, type, folder, inputs);
         var (steam, build) = Source(e, at);
-        return new CopyResource(at, type, Id(Property(e, "copy", at), at), Name(e, at), expect, replace, curves, colours, lut, mesh, textures, shaders) { Steam = steam, Build = build };
+        var physics = ReadPhysics(e, at, type, folder, inputs);
+        var joints = ReadJoints(e, at, type);
+        return new CopyResource(at, type, Id(Property(e, "copy", at), at), Name(e, at), expect, replace, curves, colours, lut, mesh, textures, shaders)
+            { Steam = steam, Build = build, Physics = physics, Joints = joints };
     }
 
     // A shader in a host, which says what else the resource needs.
@@ -491,6 +502,47 @@ public static partial class DataSpecs
         var parts = meshSpec.TryGetProperty("parts", out var pa) && (pa.ValueKind is JsonValueKind.True or JsonValueKind.False ? pa.GetBoolean() : throw new InvalidDataException($"{at}.mesh: parts is true or false."));
         inputs.Add(obj);
         return new(obj, scale, yUp, unitSpace, parts);
+    }
+
+    // "physics": {"file": "physics/quad.physics"} (a whole physics resource made from the copy's base) or
+    // {"bytes": [{"at", "expect", "set"}]} (edits on the copy of the base's physics). Only on a unit copy.
+    static PhysicsSpec? ReadPhysics(JsonElement e, string at, ulong type, string? folder, ISet<string> inputs)
+    {
+        if (!e.TryGetProperty("physics", out var spec)) return null;
+        if (type != ResourceTypes.Unit) throw new InvalidDataException($"{at}: physics is for a unit copy.");
+        if (spec.ValueKind != JsonValueKind.Object) throw new InvalidDataException($"{at}.physics: an object with file or bytes.");
+        Fields(spec, $"{at}.physics", "file", "bytes");
+        var hasFile = spec.TryGetProperty("file", out _);
+        var hasBytes = spec.TryGetProperty("bytes", out _);
+        if (hasFile == hasBytes) throw new InvalidDataException($"{at}.physics: give file or bytes, not both.");
+        if (hasBytes) return new(null, ReadBytes(spec, $"{at}.physics"));
+        var file = Text(spec, "file", $"{at}.physics").Replace('\\', '/');
+        if (Path.IsPathRooted(file) || file.Split('/').Any(part => part is "" or "." or ".."))
+            throw new InvalidDataException($"{at}.physics: file is a file in the mod folder, such as \"physics/quad.physics\".");
+        if (folder != null && !File.Exists(Path.Combine(folder, file))) throw new InvalidDataException($"{at}.physics: {file} is missing.");
+        inputs.Add(file);
+        return new(file, []);
+    }
+
+    // "joints": {"attach_driver": [x, y, z], "#cf12eb4f": [x, y, z]}: rest positions in the unit's own space (metres).
+    static Dictionary<string, double[]>? ReadJoints(JsonElement e, string at, ulong type)
+    {
+        if (!e.TryGetProperty("joints", out var spec)) return null;
+        if (type != ResourceTypes.Unit) throw new InvalidDataException($"{at}: joints is for a unit copy.");
+        var joints = new Dictionary<string, double[]>();
+        foreach (var joint in Object(spec, $"{at}.joints"))
+        {
+            var where = $"{at}.joints.{joint.Name}";
+            if (joint.Name.Length is 0 or > 100) throw new InvalidDataException($"{where}: a joint's name, or # and its 8-digit hash.");
+            var v = joint.Value;
+            if (v.ValueKind != JsonValueKind.Array || v.GetArrayLength() != 3 || v.EnumerateArray().Any(x => x.ValueKind != JsonValueKind.Number))
+                throw new InvalidDataException($"{where}: a position [x, y, z] in metres.");
+            var xyz = v.EnumerateArray().Select(x => x.GetDouble()).ToArray();
+            if (xyz.Any(x => !double.IsFinite(x) || Math.Abs(x) > 100)) throw new InvalidDataException($"{where}: each coordinate is within 100 m of the unit's origin.");
+            joints[joint.Name] = xyz;
+        }
+        if (joints.Count == 0) throw new InvalidDataException($"{at}.joints names no joint.");
+        return joints;
     }
 
     // "source": "game" (the default), "steam", or {"build": "<depot>:<manifest>"} / {"build": "yyyy-MM-dd"} (the build of

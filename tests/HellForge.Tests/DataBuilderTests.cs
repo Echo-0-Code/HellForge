@@ -418,6 +418,32 @@ static class DataBuilderTests
             var name = EngineHash.Murmur64A("test/mod/port"u8);
             check(built[new(ResourceTypes.Unit, name)].Gpu.SequenceEqual(new byte[] { 5, 5 }) && built.ContainsKey(new(ResourceTypes.Physics, name)),
                 "The unit from Steam was not copied with its physics.");
+            // A unit copy's own physics: byte edits on the base's, or a file made from the base; renamed to the copy either way.
+            const string edited = """{"type":"unit","copy":"0x3333","name":"test/mod/port","source":"steam","physics":{"bytes":[{"at":"0x58","expect":"00000000","set":"0000803F"}]}}""";
+            check(DataSpecs.Unchecked(Spec(edited)) is { } why && why.Contains("physics"), "Own physics is not marked for mod sync.");
+            ModDataBuilder.Build(Spec(edited), mod, gameReader, output + "p", steamReader);
+            var withEdits = ResourceArchive.Read(File.ReadAllBytes(Path.Combine(output + "p", "1111111111111111.patch_0")),
+                File.ReadAllBytes(Path.Combine(output + "p", "1111111111111111.patch_0.gpu_resources")), [])[new(ResourceTypes.Physics, name)].Main;
+            check(BinaryPrimitives.ReadSingleLittleEndian(withEdits.AsSpan(0x58)) == 1f && BinaryPrimitives.ReadUInt64LittleEndian(withEdits.AsSpan(0x08)) == name &&
+                BinaryPrimitives.ReadUInt64LittleEndian(withEdits.AsSpan(0x50)) == 0x3333, "The physics edits or its rename are missing.");
+            reject(() => ModDataBuilder.Build(Spec(edited.Replace("\"expect\":\"00000000\"", "\"expect\":\"01000000\"")), mod, gameReader, output + "q", steamReader));
+            var own = Physics(0x3333);
+            BinaryPrimitives.WriteSingleLittleEndian(own.AsSpan(0x5C), 2f);
+            Directory.CreateDirectory(Path.Combine(mod, "physics"));
+            File.WriteAllBytes(Path.Combine(mod, "physics", "own.physics"), own);
+            const string owned = """{"type":"unit","copy":"0x3333","name":"test/mod/port","source":"steam","physics":{"file":"physics/own.physics"}}""";
+            check(Spec(owned).Inputs.Contains("physics/own.physics"), "The physics file is not an input of the build.");
+            ModDataBuilder.Build(Spec(owned), mod, gameReader, output + "f", steamReader);
+            var fromFile = ResourceArchive.Read(File.ReadAllBytes(Path.Combine(output + "f", "1111111111111111.patch_0")),
+                File.ReadAllBytes(Path.Combine(output + "f", "1111111111111111.patch_0.gpu_resources")), [])[new(ResourceTypes.Physics, name)].Main;
+            check(BinaryPrimitives.ReadSingleLittleEndian(fromFile.AsSpan(0x5C)) == 2f && BinaryPrimitives.ReadUInt64LittleEndian(fromFile.AsSpan(0x40)) == name,
+                "The physics file was not taken, or not renamed.");
+            File.WriteAllBytes(Path.Combine(mod, "physics", "own.physics"), Physics(0x4444));
+            reject(() => ModDataBuilder.Build(Spec(owned), mod, gameReader, output + "g", steamReader)); // made from another unit
+            reject(() => Spec("""{"type":"unit","copy":"0x3333","name":"test/mod/port","physics":{"file":"physics/own.physics","bytes":[]}}"""));
+            reject(() => Spec("""{"type":"material","copy":"0x7777","name":"test/mod/m","physics":{"file":"physics/own.physics"}}"""));
+            reject(() => Spec("""{"type":"unit","copy":"0x3333","name":"test/mod/port","joints":{"seat":[0,0]}}"""));
+            reject(() => ModDataBuilder.Build(Spec("""{"type":"unit","copy":"0x3333","name":"test/mod/port","source":"steam","joints":{"seat":[0,0,1]}}"""), mod, gameReader, output + "j", steamReader)); // no scene graph
             var material = built[new(ResourceTypes.Material, 0x7777)].Main;
             check(BinaryPrimitives.ReadInt32LittleEndian(material.AsSpan(0x40)) == 1 && Value(material, 0x50) == 42 &&
                 BinaryPrimitives.ReadUInt64LittleEndian(material.AsSpan(0x88 + 4)) == 0x101, "The material from Steam is not in the game copy's shader layout.");
