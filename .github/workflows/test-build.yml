@@ -1,10 +1,10 @@
-# Echo-0-Code's test builds of the customize-list-watch branch: the package, as the nightly builds it, for a tester to
-# install. Only on that branch; it goes before the branch's pull request.
+# Echo-0-Code's test builds of the paint limit branches: the package, as the nightly builds it, for a tester to
+# install. Only on those branches; it goes before their pull request.
 name: Test build
 
 on:
   push:
-    branches: [customize-list-watch]
+    branches: [customize-list-watch, paint-limit-dev]
   workflow_dispatch:
 
 jobs:

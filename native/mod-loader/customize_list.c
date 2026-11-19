@@ -4,7 +4,8 @@
  * CL_CAP entries, its fields CL_SHIFT further on. The build runs on the frame, the UI is handed the frame's list, and the
  * 75 instructions that reach those fields read and write them CL_SHIFT further on (the same length, every byte pinned).
  * S keeps a copy of the first 64 entries for the code that still walks S itself. Off with HELLFORGE_CUSTOMIZE_LIST=0
- * or while HELLFORGE_CUSTOMIZE_WATCH=1. RegisteredItems.PatternsPerWeapon depends on it. Included after customize_watch.c. */
+ * or while HELLFORGE_CUSTOMIZE_WATCH=1. RegisteredItems.PatternsPerWeapon depends on it. Included after warbond_showcase.c. */
+#include "customize_watch.c"
 #define CL_CAP 127u                 /* the most an imm8 bound says */
 #define CL_SHIFT 0x19C0u            /* the fields move from S+0x640 to frame+0x2000 */
 #define CL_ENTRIES 0x40u
@@ -315,4 +316,12 @@ static void CustomizeListInstall(void)
     if (why) { Note("customize list: a weapon shows 64 cards at most (%s)", why); return; }
     g_clState = 1;
     Note("customize list: on; a weapon shows %u cards", CL_CAP);
+}
+
+/* The watch, or the longer list: the watch's guard needs the list where the game keeps it. */
+static void CustomizeScreenInstall(void)
+{
+    CustomizeWatchInstall();
+    CustomizeWatchReport();
+    CustomizeListInstall();
 }

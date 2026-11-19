@@ -2,8 +2,8 @@
  * 0x1493770's rcx) holds the list at S+8 (64 entries of 0x18 from S+0x40, its own fields after them), and the screen code
  * reaches it by fixed offsets. To make the list longer every instruction that touches it has to be known, so while a
  * screen is open its list pages are closed and each instruction that touches the list is noted once, with the offset it
- * touched. Off unless HELLFORGE_CUSTOMIZE_WATCH=1; the game runs slower while a guarded screen is open. Included after
- * warbond_showcase.c. */
+ * touched. Off unless HELLFORGE_CUSTOMIZE_WATCH=1; the game runs slower while a guarded screen is open. Included by
+ * customize_list.c. */
 #define CW_BUILD 0x1493770u    /* BuildCustomizationList(S, weapon) */
 #define CW_CLOSE 0x1493100u    /* the screen's tear-down: S+0x8e8cf8 = 0 */
 #define CW_LIST 8u             /* the list, from S */
