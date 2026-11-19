@@ -12,6 +12,9 @@ On `dev`, since 0.4.0-beta.
 
 ### Added
 
+- **Camouflage shapes of your own.** A data spec can add layers to one of the game's array textures after its own
+  (a texture `edit` with `layers`). A LUT cell takes `[r, g, b, a]`, so a weapon paint can pick any camouflage layer,
+  the game's or a mod's ([patterns](docs/modding/patterns.md#camouflage-shapes-on-weapons)).
 - **Buttons over game menus.** A screen that is not modal can take the mouse's clicks inside its own boxes with the
   new `HfDraw.take_clicks`, so a mod's button can sit on the armory. The game gets neither the press nor its release;
   everything else still reaches it (#2, [overlay](docs/modding/overlay.md#click-boxes)).
