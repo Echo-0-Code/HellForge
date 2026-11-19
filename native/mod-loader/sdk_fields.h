@@ -1415,13 +1415,21 @@ static const SdkField kSdkFieldsStatusEffectReceiver[] = {
     {"duration_7_multiplier", 46596, 4, HF_TYPE_F32, HF_APPLIES_NOW, REF_NONE},
 };
 static const SdkField kSdkFieldsInteractable[] = {
+    {"zone0_radius", 12, 4, HF_TYPE_F32, HF_APPLIES_RESPAWN, REF_NONE},
     {"zone0_type", 48, 4, HF_TYPE_U32, HF_APPLIES_RESPAWN, REF_NONE},
+    {"zone1_radius", 148, 4, HF_TYPE_F32, HF_APPLIES_RESPAWN, REF_NONE},
     {"zone1_type", 184, 4, HF_TYPE_U32, HF_APPLIES_RESPAWN, REF_NONE},
+    {"zone2_radius", 284, 4, HF_TYPE_F32, HF_APPLIES_RESPAWN, REF_NONE},
     {"zone2_type", 320, 4, HF_TYPE_U32, HF_APPLIES_RESPAWN, REF_NONE},
+    {"zone3_radius", 420, 4, HF_TYPE_F32, HF_APPLIES_RESPAWN, REF_NONE},
     {"zone3_type", 456, 4, HF_TYPE_U32, HF_APPLIES_RESPAWN, REF_NONE},
+    {"zone4_radius", 556, 4, HF_TYPE_F32, HF_APPLIES_RESPAWN, REF_NONE},
     {"zone4_type", 592, 4, HF_TYPE_U32, HF_APPLIES_RESPAWN, REF_NONE},
+    {"zone5_radius", 692, 4, HF_TYPE_F32, HF_APPLIES_RESPAWN, REF_NONE},
     {"zone5_type", 728, 4, HF_TYPE_U32, HF_APPLIES_RESPAWN, REF_NONE},
+    {"zone6_radius", 828, 4, HF_TYPE_F32, HF_APPLIES_RESPAWN, REF_NONE},
     {"zone6_type", 864, 4, HF_TYPE_U32, HF_APPLIES_RESPAWN, REF_NONE},
+    {"zone7_radius", 964, 4, HF_TYPE_F32, HF_APPLIES_RESPAWN, REF_NONE},
     {"zone7_type", 1000, 4, HF_TYPE_U32, HF_APPLIES_RESPAWN, REF_NONE},
 };
 static const SdkComponent kSdkComponents[] = {
@@ -1499,5 +1507,5 @@ static const SdkComponent kSdkComponents[] = {
     {"AiEnemy", "AiEnemyComponentData", 25480438u, 732u, kSdkFieldsAiEnemy, 17, 0, 302},
     {"Locomotion", "LocomotionComponentData", 25480438u, 4624u, kSdkFieldsLocomotion, 2, 0, 311},
     {"StatusEffectReceiver", "StatusEffectReceiverComponentData", 25480438u, 46600u, kSdkFieldsStatusEffectReceiver, 148, 0, 307},
-    {"Interactable", "InteractableComponentData", 25480438u, 1104u, kSdkFieldsInteractable, 8, 0, 244},
+    {"Interactable", "InteractableComponentData", 25480438u, 1104u, kSdkFieldsInteractable, 16, 0, 244},
 };

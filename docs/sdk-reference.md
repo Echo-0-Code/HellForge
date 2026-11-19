@@ -10285,13 +10285,21 @@ Group `spread` (the missile spread: its veer off the launch line, its curve and 
 
 | Field | Offset | Type | Applies | Meaning |
 |---|---|---|---|---|
+| `zone0_radius` | +0x0C | f32 | respawn? | interact zone 0: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) |
 | `zone0_type` | +0x30 | u32 | respawn? | interact zone 0: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) |
+| `zone1_radius` | +0x94 | f32 | respawn? | interact zone 1: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) |
 | `zone1_type` | +0xB8 | u32 | respawn? | interact zone 1: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) |
+| `zone2_radius` | +0x11C | f32 | respawn? | interact zone 2: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) |
 | `zone2_type` | +0x140 | u32 | respawn? | interact zone 2: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) |
+| `zone3_radius` | +0x1A4 | f32 | respawn? | interact zone 3: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) |
 | `zone3_type` | +0x1C8 | u32 | respawn? | interact zone 3: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) |
+| `zone4_radius` | +0x22C | f32 | respawn? | interact zone 4: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) |
 | `zone4_type` | +0x250 | u32 | respawn? | interact zone 4: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) |
+| `zone5_radius` | +0x2B4 | f32 | respawn? | interact zone 5: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) |
 | `zone5_type` | +0x2D8 | u32 | respawn? | interact zone 5: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) |
+| `zone6_radius` | +0x33C | f32 | respawn? | interact zone 6: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) |
 | `zone6_type` | +0x360 | u32 | respawn? | interact zone 6: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) |
+| `zone7_radius` | +0x3C4 | f32 | respawn? | interact zone 7: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) |
 | `zone7_type` | +0x3E8 | u32 | respawn? | interact zone 7: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) |
 
 ## Settings tables
