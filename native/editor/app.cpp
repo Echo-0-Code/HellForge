@@ -35,6 +35,7 @@ std::map<std::string, int> g_scroll, g_seen;
 float g_catScroll = 0;
 SearchBox g_search;
 std::map<std::string, std::string> g_group;
+std::map<std::string, int> g_level;
 double g_choice[2] = {-1, -1};
 Picker g_picker;
 std::map<std::string, double> g_mounts;
@@ -760,7 +761,7 @@ void Tick()
     if (!g_catalogOk || g_modRole == -1) return;
     if (now >= next) { next = now + 250; ReadSession(); }
     SyncModValues();
-    HolderTick(500); /* the marks are ready when the editor opens */
+    if (g_windowShown || !g_holdersRead) HolderTick(500); /* closed: the first pass only, so the marks are ready when it opens */
 }
 
 float PixelScale(float width, float height)
@@ -843,6 +844,7 @@ void Opened()
     sounds::EditorOpen(true);
     Sound(sounds::SHOW);
     g_live.clear(); /* read the game's values again */
+    HoldersAgain(); /* and who holds them: closed, the editor read them once */
     std::string error;
     if (!g_host.modsFolder.empty() && !localstats::Pending()) localstats::Load(g_host.modsFolder, &error);
 }

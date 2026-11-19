@@ -111,6 +111,9 @@ static class InventorySyncTests
         test("The signing service's files reach the sync folder: the account files once, the seal last, a sealed state only after them", () =>
             SignerMirror(root, check));
 
+        test("The launcher reads the signing service only through the evidence folder root shares, never the service's private run folder", () =>
+            SignerEvidence(root, check));
+
         test("The signing copy of the Linux capture must match this installation's capture-linux by its manifest", () =>
             SignerCopy(root, check));
 
@@ -361,16 +364,40 @@ static class InventorySyncTests
                 missingLog.Contains("system.reg check: the key is not in system.reg: the import did not land", StringComparison.Ordinal),
                 "The capture log did not record both checks for a missing import: " + string.Join(" / ", missingLog.Split('\n').TakeLast(8)));
 
-            // system.reg has the key but reg export writes no file: the message says which check failed.
+            // system.reg has the key but reg export fails and writes no file (bug-report-0559: SteamOS, Proton Experimental,
+            // exit -1): system.reg is what the game's Wine loads, so the certificate is in place and the sync goes on.
+            // The prefix's system.reg here is written the way wineserver saves it, so the fallback is proven on that form.
             var notReadFolder = Directory.CreateDirectory(Path.Combine(root, "linux-capture-record", "fake-not-read")).FullName;
-            var notRead = WriteFakeProton(notReadFolder, Path.Combine(notReadFolder, "state"), template, expectedHex,
+            var wineTemplate = Path.Combine(notReadFolder, "system.reg.wine");
+            File.WriteAllText(wineTemplate, WineSystemReg(thumbprint, LinuxCapture.CertificateBlob(der)));
+            var notRead = WriteFakeProton(notReadFolder, Path.Combine(notReadFolder, "state"), wineTemplate, expectedHex,
                 importLands: true, exportTemplate: null);
-            var exportLost = Refusal(() => LinuxCapture.InstallCertificate(fakeRecord with { Proton = notRead }));
-            check(exportLost.Contains("reg export exited 1", StringComparison.Ordinal) &&
-                exportLost.Contains("system.reg holds the expected Blob", StringComparison.Ordinal) &&
-                !exportLost.Contains("reg query", StringComparison.Ordinal) &&
-                !exportLost.Contains("xrizer", StringComparison.Ordinal),
-                "A readable system.reg with a failed export was not named: " + exportLost);
+            LinuxCapture.InstallCertificate(fakeRecord with { Proton = notRead });
+            var exportLostLog = File.ReadAllText(Path.Combine(sync, InventorySync.LauncherLogFile));
+            check(exportLostLog.Contains("reg export did not confirm the Blob (reg export exited 1); system.reg holds it", StringComparison.Ordinal),
+                "A failed export beside a system.reg with the Blob was not taken, or not logged: " + string.Join(" / ", exportLostLog.Split('\n').TakeLast(4)));
+
+            // reg export exits 0 but its file has no Blob for the key: found nothing, so system.reg decides as above.
+            var emptyExport = Path.Combine(notReadFolder, "empty-export.reg");
+            LinuxCapture.WriteRegistryFile(emptyExport, "Windows Registry Editor Version 5.00\r\n\r\n[Other\\Key]\r\n");
+            var emptyProton = WriteFakeProton(notReadFolder, Path.Combine(notReadFolder, "state-empty"), wineTemplate, expectedHex,
+                importLands: true, exportTemplate: emptyExport);
+            LinuxCapture.InstallCertificate(fakeRecord with { Proton = emptyProton });
+            check(File.ReadAllText(Path.Combine(sync, InventorySync.LauncherLogFile)).Contains(
+                    "reg export did not confirm the Blob (the export file has no Blob for the key); system.reg holds it", StringComparison.Ordinal),
+                "An export without the key beside a system.reg with the Blob was not taken, or not logged.");
+
+            // A failed export never excuses a system.reg whose Blob is another certificate's.
+            var otherBlob = LinuxCapture.CertificateBlob(der);
+            otherBlob[^1] ^= 0xFF;
+            var otherTemplate = Path.Combine(notReadFolder, "system.reg.other");
+            File.WriteAllText(otherTemplate, WineSystemReg(thumbprint, otherBlob));
+            var otherProton = WriteFakeProton(notReadFolder, Path.Combine(notReadFolder, "state-other"), otherTemplate, expectedHex,
+                importLands: true, exportTemplate: null);
+            var otherRefusal = Refusal(() => LinuxCapture.InstallCertificate(fakeRecord with { Proton = otherProton }));
+            check(otherRefusal.Contains("its Blob value does not match the certificate", StringComparison.Ordinal) &&
+                otherRefusal.Contains("reg export exited 1", StringComparison.Ordinal),
+                "A failed export beside a system.reg with another Blob was accepted: " + otherRefusal);
 
             var badFolder = Directory.CreateDirectory(Path.Combine(root, "linux-capture-record", "fake-bad-proton")).FullName;
             var badExport = Path.Combine(badFolder, "bad-export.reg");
@@ -529,6 +556,9 @@ static class InventorySyncTests
             "WINE REGISTRY Version 2\n\n[" + systemKey + "]\n\"Blob\"=hex:" + expected[..24] + ",\\\n  " + expected[24..] + "\n\n[Other\\\\Key]\n",
             thumbprint);
         check(continued.KeyFound && continued.BlobHex == expected, "A continued system.reg Blob was not read in full.");
+        var wineSaved = LinuxCapture.ReadSystemRegCertificate(WineSystemReg(thumbprint.ToLowerInvariant(), blob), thumbprint);
+        check(wineSaved.KeyFound && wineSaved.BlobHex == expected,
+            "system.reg as wineserver saves it (key timestamp, #time line, lower-case wrapped hex) did not yield the Blob.");
         check(!LinuxCapture.ReadSystemRegCertificate(systemReg, new string('B', 40)).KeyFound,
             "Another certificate's key was reported present.");
         check(LinuxCapture.ReadSystemRegCertificate("[" + systemKey + "]\n\"Other\"=hex:00\n", thumbprint) is
@@ -1418,6 +1448,28 @@ static class InventorySyncTests
         return proton;
     }
 
+    // system.reg as wineserver saves it (Wine's server/registry.c, save_subkeys and dump_value): the section line ends with
+    // the key's modification time, a #time line follows, and REG_BINARY is lower-case comma-separated hex wrapped after
+    // column 76 with "\" and two spaces. Other keys and values sit around the certificate's.
+    static string WineSystemReg(string thumbprint, byte[] blob)
+    {
+        var text = new StringBuilder("WINE REGISTRY Version 2\n;; All keys relative to \\\\Machine\n\n#arch=win64\n\n");
+        text.Append("[Software\\\\Microsoft\\\\SystemCertificates\\\\Root] 1763500000\n#time=1dc5883b5f0c2a4\n\n");
+        text.Append("[Software\\\\Microsoft\\\\SystemCertificates\\\\Root\\\\Certificates\\\\").Append(thumbprint)
+            .Append("] 1763500001\n#time=1dc5883b5f0c2a5\n\"Blob\"=hex:");
+        var column = "\"Blob\"=hex:".Length;
+        for (var index = 0; index < blob.Length; index++)
+        {
+            text.Append(blob[index].ToString("x2", System.Globalization.CultureInfo.InvariantCulture));
+            column += 2;
+            if (index == blob.Length - 1) break;
+            text.Append(',');
+            if (++column > 76) { text.Append("\\\n  "); column = 2; }
+        }
+        text.Append("\n\n[Software\\\\Wine\\\\Other] 1763500002\n#time=1dc5883b5f0c2a6\n\"Flags\"=dword:00000001\n");
+        return text.ToString();
+    }
+
     static string ShQuote(string value) => "'" + value.Replace("'", "'\\''", StringComparison.Ordinal) + "'";
 
     static (int ExitCode, string Output) RunHelper(string helper, params string[] arguments)
@@ -1736,6 +1788,76 @@ static class InventorySyncTests
         if (OperatingSystem.IsLinux())
             check(File.GetUnixFileMode(Path.Combine(sync, SnapshotSeal.FileName)) == (UnixFileMode.UserRead | UnixFileMode.UserWrite),
                 "A copied account file is readable by other accounts.");
+    }
+
+    // systemd puts a DynamicUser service's preserved RuntimeDirectory in /run/private (root's, 0700) behind a link, so the
+    // player's launcher cannot read /run/hellforge-capture: it waited there 45 seconds for a capture that was listening.
+    // Root's helper copies the service's log, state and CA to the evidence folder, and the launcher reads only that.
+    static void SignerEvidence(string root, Action<bool, string> check)
+    {
+        var script = Path.GetFullPath(Path.Combine("linux", LinuxCapture.HelperScript));
+        if (!File.Exists(script)) { Console.WriteLine("  (skipped: linux/capture-helper.sh is not in the test working directory)"); return; }
+        var helperText = File.ReadAllText(script);
+        check(helperText.Contains("-p DynamicUser=yes", StringComparison.Ordinal) &&
+            helperText.Contains("-p RuntimeDirectoryPreserve=yes", StringComparison.Ordinal) &&
+            helperText.Contains("signer_run='/run/hellforge-capture'", StringComparison.Ordinal),
+            "The helper's service changed: check what the launcher can read of it.");
+        check(helperText.Contains("state_dir='/run/hellforge'", StringComparison.Ordinal) &&
+            helperText.Contains("evidence_name='capture-evidence'", StringComparison.Ordinal) &&
+            LinuxCapture.SignerEvidenceFolder == "/run/hellforge/capture-evidence" &&
+            LinuxCapture.SignerHandOverFolder == "/run/hellforge/capture-out",
+            "The launcher's evidence or hand-over folder is not the one capture-helper.sh shares.");
+        check(!LinuxCapture.SignerEvidenceFolder.StartsWith("/run/hellforge-capture", StringComparison.Ordinal),
+            "The launcher reads the signing service's run folder, which only root can enter.");
+
+        var folder = Directory.CreateDirectory(Path.Combine(root, "signer-evidence")).FullName;
+        var sync = Directory.CreateDirectory(Path.Combine(folder, "sync")).FullName;
+        var handOver = Path.Combine(folder, "out");
+        var run = Directory.CreateDirectory(Path.Combine(folder, "private", "hellforge-capture")).FullName;
+        File.WriteAllText(Path.Combine(run, "proxy.log"), "listening on port 18443\n");
+        File.WriteAllBytes(LinuxCapture.CertificatePath(run), [0x30, 0x82, 0x01]);
+        CaptureState.Write(run, 42, sealedCapture: false, progression: false);
+        if (!OperatingSystem.IsLinux()) { Console.WriteLine("  (skipped: the helper's evidence copy on Linux)"); return; }
+
+        // The service's folder behind a parent this account cannot enter, as /run/private is: nothing there is seen.
+        var privateParent = Path.Combine(folder, "private");
+        File.SetUnixFileMode(privateParent, UnixFileMode.None);
+        try
+        {
+            if (!Directory.Exists(run))
+            {
+                LinuxCapture.MirrorSignerRun(run, handOver, sync, false);
+                check(!LinuxCapture.SigningCaptureReady(run, sync) && !File.Exists(Path.Combine(sync, "proxy.log")),
+                    "A run folder this account cannot enter was read.");
+            }
+            else Console.WriteLine("  (skipped: this account enters any folder, as root does)");
+        }
+        finally { File.SetUnixFileMode(privateParent, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+
+        // A file the service swapped for a link is never read through it.
+        var secret = Path.Combine(folder, "secret");
+        File.WriteAllText(secret, "not the service's");
+        File.CreateSymbolicLink(Path.Combine(run, CaptureStart.FailureFile), secret);
+        var state = Path.Combine(folder, "state");
+        var share = RunHelper(script, "share", "--run-dir", run, "--state-dir", state);
+        check(share.ExitCode == 0, "The helper could not share the service's evidence: " + share.Output);
+        var evidence = Path.Combine(state, "capture-evidence");
+        var shared = Directory.Exists(evidence) ? Directory.GetFileSystemEntries(evidence).Select(Path.GetFileName).Order(StringComparer.Ordinal).ToArray() : [];
+        check(shared.SequenceEqual(["capture-ca.cer", CaptureState.FileName, "proxy.log"]),
+            "The evidence folder does not hold exactly the log, state and CA: " + string.Join(", ", shared));
+        var readable = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.GroupRead | UnixFileMode.OtherRead;
+        foreach (var name in shared)
+        {
+            var path = Path.Combine(evidence, name!);
+            check((File.GetAttributes(path) & FileAttributes.ReparsePoint) == 0 && File.GetUnixFileMode(path) == readable,
+                "A shared file is a link or not readable by the player's account: " + name);
+        }
+
+        check(!LinuxCapture.SigningCaptureReady(evidence, sync), "The capture read as listening before its state reached the sync folder.");
+        check(!LinuxCapture.MirrorSignerRun(evidence, handOver, sync, false) && LinuxCapture.SigningCaptureReady(evidence, sync) &&
+            File.ReadAllText(Path.Combine(sync, "proxy.log")).Contains("18443", StringComparison.Ordinal) &&
+            !File.Exists(Path.Combine(sync, CaptureStart.FailureFile)),
+            "The shared evidence did not make the capture read as listening, or a linked file reached the sync folder.");
     }
 
     static void SignerCopy(string root, Action<bool, string> check)

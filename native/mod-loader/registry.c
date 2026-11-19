@@ -170,13 +170,16 @@ typedef struct Weapon
 } Weapon;
 
 /* Mod text by id, answered by the text lookup detour: four for each weapon or entity (name, upper-case name, description,
- * designation), three for each stratagem (stratagems.c asserts its STR_MAX_NEW fits) and two for the difficulty. Weapons
- * once shared a fixed 4 * 512 with the others, so a full pack left a stratagem with its base's name. They grow as they are added
- * (stable_array.c: TextDetour reads them on the game thread while a live change adds more). */
+ * designation), three for each stratagem (stratagems.c asserts its STR_MAX_NEW fits), the attachments' and patterns'
+ * and two for the difficulty. Weapons once shared a fixed 4 * 512 with the others, so a full pack left a stratagem with
+ * its base's name. They grow as they are added (stable_array.c: TextDetour reads them on the game thread while a live
+ * change adds more). */
 #define REG_STRATAGEM_TEXTS (1024 * 3)
+/* three for each attachment or weapon pattern and one for each unit pattern (attachments.c asserts ATT_MAX and PAT_MAX fit) */
+#define REG_ATTACHMENT_TEXTS (1024 * 3 + 128)
 typedef struct ModText { uint32_t id; char* text; } ModText;
 /* + four for each mod warbond (warbonds.c: its name and the line above it, each in two cases), 99 at most */
-#define REG_TEXT_CEILING ((size_t)REG_WEAPON_CEILING * 4 + REG_STRATAGEM_TEXTS + 2 + 4 * 99)
+#define REG_TEXT_CEILING ((size_t)REG_WEAPON_CEILING * 4 + REG_STRATAGEM_TEXTS + REG_ATTACHMENT_TEXTS + 2 + 4 * 99)
 static ModText* g_texts;
 static StableArray g_textStore = {NULL, sizeof(ModText), REG_TEXT_CEILING, 0};
 static int g_textCount;
@@ -382,6 +385,29 @@ static uint64_t LoadoutOwner(uint8_t* table, uint32_t record)
         if (entity != 0 && r == record && !PlainCopy(entity)) { if (owner != 0) return 0; owner = entity; }
     }
     return owner;
+}
+
+/* The entity an armory entry of a loadout record names: its owner (LoadoutOwner), or, for a record no other entity names,
+ * the one entity copy whose own record it is (an entity of add_entity: PlainLoadoutRecord). The game asks the armory
+ * which list an item's entity is in (game.dll 0x11E7AE0: 1 primary, 2 support, 3 secondary...), and a hellpod rack that
+ * breaks (0x936530) turns on the dropped item's pickup by that answer: with no entry naming it, a mod's EAT copy got the
+ * pickup of "in no list" (interaction 7), which a support weapon does not have, and could never be picked up again
+ * (Discord, 2026-11-15). EquipmentComponent's spawn (0x8BF260) and taking the item in hand (0x9AA3F1) ask the same. */
+static uint64_t ArmoryEntity(uint8_t* table, uint32_t record)
+{
+    uint64_t owner = LoadoutOwner(table, record), copy = 0;
+    if (owner != 0) return owner;
+    for (uint32_t i = 0, slots = SlotsOf(REG_LOADOUT); i < slots; i++)
+    {
+        uint64_t entity;
+        uint32_t r;
+        memcpy(&entity, table + 16 * i, 8);
+        memcpy(&r, table + 16 * i + 8, 4);
+        if (entity == 0 || r != record) continue;
+        if (!PlainCopy(entity) || copy != 0) return 0; /* two entities name it: no one owner */
+        copy = entity;
+    }
+    return copy;
 }
 
 /* What the game keeps once state_moves.c has moved its arrays (0: what it compiled, as far as the backend need know). */
@@ -794,12 +820,27 @@ static OwnedTable* OwnedTableOf(uint32_t c, const uint8_t* index)
     return owned;
 }
 
+/* A registered weapon's own loadout record. Table 29 is copied by CopyLoadoutAndList, not OwnedCopy, so it is in no
+ * OwnedTable: without this, component_record, hf_record and hf_set found no record past the vanilla ones. */
+static uintptr_t OwnLoadoutRecordOf(uint8_t* table, uint32_t slots, uint64_t resource, uint32_t* stride)
+{
+    if (table == NULL || table != g_loadoutTable) return 0;
+    uint8_t* row = FindRow(table, slots, 16, resource);
+    uint32_t record;
+    if (row == NULL) return 0;
+    memcpy(&record, row + 8, 4);
+    if (record < REG_LOADOUT_RECORDS || record >= g_loadoutRecords) return 0; /* a vanilla record: its base's, shared */
+    if (stride != NULL) *stride = REG_LOADOUT_STRIDE;
+    return (uintptr_t)(table + (size_t)slots * 16 + (size_t)record * REG_LOADOUT_STRIDE);
+}
+
 /* component_record for a registered weapon: its own record of the component, or 0 when it shares the base's. */
 static uintptr_t RegisteredRecord(const Component* c, uint64_t resource, uint32_t* stride)
 {
     if (!WeaponRegistered(resource)) return 0;
     uint8_t* table = StatePointer(EntityState(), REG_TABLES + 8 * c->index);
     uint32_t slots = SlotsOf(c->index);
+    if (c->index == REG_LOADOUT) return OwnLoadoutRecordOf(table, slots, resource, stride);
     for (int i = 0; i < g_ownedCount; i++)
     {
         OwnedTable* owned = &g_owned[i];
@@ -830,33 +871,30 @@ static int TableHeaderMatches(const Component* c, const uint8_t* table)
     return !SafeRead((uintptr_t)table - 32, header, 32) && !memcmp(header, &c->index, 4) && !memcmp(header + 4, c->header, 28);
 }
 
-/* The record the entity's one index row in table names, or -1 when it has none, several or a flagged one, or a row is
- * unreadable. */
-static int64_t OnlyRecordOf(const Component* c, const uint8_t* table, uint64_t resource)
+/* The record the entity's one index row names, or -1 when it has none, several or a flagged one. rows: the table's
+ * index rows (ReadIndexRows). */
+static int64_t OnlyRecordOf(const Component* c, const uint8_t* rows, uint64_t resource)
 {
     int64_t selected = -1;
     int owners = 0;
     for (uint32_t row = 0; row < c->indices; row++)
     {
-        uint8_t entry[16];
         uint64_t id;
         uint32_t record, flags;
-        if (SafeRead((uintptr_t)table + row * 16u, entry, 16)) return -1;
-        memcpy(&id, entry, 8); memcpy(&record, entry + 8, 4); memcpy(&flags, entry + 12, 4);
+        IndexRowAt(rows, row, &id, &record, &flags); /* hellforge_modloader.c */
         if (id == resource) { if (flags) return -1; owners++; selected = record; }
     }
     return owners == 1 ? selected : -1;
 }
 
-/* Whether another entity (not a copy of its base) names the record too; an unreadable row counts as one. */
-static int RecordShared(const Component* c, const uint8_t* table, uint64_t resource, uint32_t selected)
+/* Whether another entity (not a copy of its base) names the record too. */
+static int RecordShared(const Component* c, const uint8_t* rows, uint64_t resource, uint32_t selected)
 {
     for (uint32_t row = 0, sharers = 0; row < c->indices; row++)
     {
-        uint8_t entry[16];
+        const uint8_t* entry = rows + (size_t)row * 16;
         uint64_t id;
         uint32_t record;
-        if (SafeRead((uintptr_t)table + row * 16u, entry, 16)) return 1;
         memcpy(&id, entry, 8); memcpy(&record, entry + 8, 4);
         if (id != 0 && id != resource && record == selected && !CopiesBase(id) && ++sharers > 0) return 1;
     }
@@ -876,9 +914,11 @@ static uintptr_t CurrentTableRecord(const Component* c, uint64_t resource, uint3
     const OwnedTable* owned = OwnedTableOf(c->index, table);
     if (owned == NULL && !TableHeaderMatches(c, table)) return 0;
     uint32_t limit = owned != NULL ? owned->next : c->records;
-    int64_t selected = OnlyRecordOf(c, table, resource);
+    const uint8_t* rows = ReadIndexRows((uintptr_t)table, c->indices); /* an unreadable row: no record */
+    if (rows == NULL) return 0;
+    int64_t selected = OnlyRecordOf(c, rows, resource);
     if (selected < 0 || selected >= limit) return 0;
-    if (!shared && RecordShared(c, table, resource, (uint32_t)selected)) return 0;
+    if (!shared && RecordShared(c, rows, resource, (uint32_t)selected)) return 0;
     if (stride != NULL) *stride = c->stride;
     return (uintptr_t)table + (uintptr_t)c->indices * 16u + (uintptr_t)selected * c->stride;
 }

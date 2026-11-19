@@ -126,5 +126,65 @@ static class ReportedIssuesTests
             check(new[] { "bin/nvngx_dlss.dll", "bin/libxess.dll", "bin/amd_fidelityfx_upscaler_dx12.dll" }.All(p =>
                 SupportedBuild.IsReplaceable(p) && SupportedBuild.Current.Files.Any(f => f.Path == p)), "The upscalers are not the build's.");
         });
+
+        test("A launcher started from a Steam shortcut does not pass the shortcut's app id on (#434)", () =>
+        {
+            // what Steam sets for a non-Steam shortcut: its own app id and game id
+            var shortcut = new Dictionary<string, string?> { ["SteamAppId"] = "3221225472", ["SteamGameId"] = "13835058055282163712", ["SteamOverlayGameId"] = "13835058055282163712" };
+            check(SteamShortcutEnvironment.Foreign(shortcut.GetValueOrDefault).SequenceEqual(SteamShortcutEnvironment.Names), "A shortcut's ids were kept.");
+            var game = new Dictionary<string, string?> { ["SteamAppId"] = "553850", ["SteamGameId"] = "553850" };
+            check(SteamShortcutEnvironment.Foreign(game.GetValueOrDefault).Count == 0, "HELLDIVERS 2's own ids were removed.");
+            check(SteamShortcutEnvironment.Foreign(new Dictionary<string, string?> { ["SteamAppId"] = "0" }.GetValueOrDefault).SequenceEqual(["SteamAppId"]),
+                "An app id of 0 was kept.");
+            if (!OperatingSystem.IsWindows())
+            {
+                check(SteamShortcutEnvironment.Forget().Count == 0, "Linux lost Steam's variables.");
+                return;
+            }
+            var saved = SteamShortcutEnvironment.Names.ToDictionary(name => name, Environment.GetEnvironmentVariable);
+            try
+            {
+                foreach (var (name, value) in shortcut) Environment.SetEnvironmentVariable(name, value);
+                check(SteamShortcutEnvironment.Forget().Count == 3, "Not every shortcut id was removed.");
+                var child = new System.Diagnostics.ProcessStartInfo("cmd.exe").Environment;
+                check(SteamShortcutEnvironment.Names.All(name => !child.ContainsKey(name)), "A program started afterwards still gets the shortcut's ids.");
+                Environment.SetEnvironmentVariable("SteamAppId", "553850");
+                check(SteamShortcutEnvironment.Forget().Count == 0 && Environment.GetEnvironmentVariable("SteamAppId") == "553850", "The game's own id was removed.");
+            }
+            finally { foreach (var (name, value) in saved) Environment.SetEnvironmentVariable(name, value); }
+        });
+
+        test("Listing zipped mods while another program holds the hash cache leaves no partial files (#331)", () =>
+        {
+            var mods = Path.Combine(root, "mods-held-cache");
+            Directory.CreateDirectory(mods);
+            using (var zip = System.IO.Compression.ZipFile.Open(Path.Combine(mods, "held.zip"), System.IO.Compression.ZipArchiveMode.Create))
+            {
+                using (var writer = new StreamWriter(zip.CreateEntry(ModCatalog.ManifestName).Open()))
+                    writer.Write("""{"format":1,"id":"test.held","name":"Held","version":"1"}""");
+                using (var writer = new StreamWriter(zip.CreateEntry("data/0123456789abcdef.patch_0").Open())) writer.Write("patch bytes");
+            }
+            var cache = Path.Combine(mods, ModArchives.UnpackedFolder);
+            // what an earlier version left: one old partial (removed) and one being written now (kept)
+            Directory.CreateDirectory(cache);
+            var old = Path.Combine(cache, ".zip-hashes.json.0badf00d.partial");
+            var young = Path.Combine(cache, ".zip-files.json.0123abcd.partial");
+            File.WriteAllText(old, "{}");
+            File.SetLastWriteTimeUtc(old, DateTime.UtcNow.AddHours(-1));
+            File.WriteAllText(young, "{}");
+            var (loaded, problems) = ModCatalog.Load(mods);
+            check(loaded.Any(m => m.Id == "test.held"), "The zipped mod did not load: " + string.Join(" | ", problems));
+            check(!File.Exists(old) && File.Exists(young), "Left partials: the old one was kept or the young one removed.");
+            File.Delete(young);
+            var hashes = Path.Combine(cache, ".zip-hashes.json");
+            var before = File.ReadAllText(hashes);
+            // another program reading the cache without delete sharing: Windows refuses to replace it
+            using (new FileStream(hashes, FileMode.Open, FileAccess.Read, FileShare.Read))
+                for (var i = 0; i < 3; i++)
+                    check(ModCatalog.Load(mods).Mods.Any(m => m.Id == "test.held"), "Listing failed while the cache was held.");
+            var left = Directory.GetFiles(cache, "*.partial");
+            check(left.Length == 0, "Partial files left: " + string.Join(", ", left.Select(Path.GetFileName)));
+            check(File.ReadAllText(hashes) == before, "The held cache changed.");
+        });
     }
 }

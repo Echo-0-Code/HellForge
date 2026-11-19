@@ -67,7 +67,8 @@ a systemd service with its own dynamic user, so the signer's private key is out 
 | Path | Holds |
 |---|---|
 | `/var/lib/private/hellforge-signer/signer.key` | The signer's private key, readable only by the service's user |
-| `/run/hellforge-capture/` | The service's log, state and CA certificate; its account files are mode `0600` |
+| `/run/hellforge-capture/` | The service's run folder. systemd keeps it in `/run/private`, which only root can open |
+| `/run/hellforge/capture-evidence/` | The service's log, state and CA certificate, copied there by root every half second |
 | `/run/hellforge/capture-out/` | The sealed account files, copied by root, then given to the player |
 | `/var/lib/hellforge/snapshot-signer.pub` | The public key, written by root, mode `0644` |
 
@@ -80,7 +81,8 @@ a systemd service with its own dynamic user, so the signer's private key is out 
 - A HellForge update that changes the capture makes the next sync offer the helper install again.
 
 The service stops at the capture's 10-minute timeout plus two minutes (`RuntimeMaxSec`). Root moves no file the player
-can change: it copies the sealed files into its own folder, `seal.json` last, then hands that folder over.
+can change: it copies the sealed files into its own folder, `seal.json` last, then hands that folder over. It copies
+only plain files and never reads one through a link the service left in its place.
 
 ## Which Proton opens the game's prefix
 
@@ -133,14 +135,17 @@ The supervisor imports the certificate into `steamapps/compatdata/553850/pfx`. I
 serialized `Blob`, under `HKEY_LOCAL_MACHINE\Software\Microsoft\SystemCertificates\Root\Certificates\<SHA-1>`. The import
 uses `proton run reg import` with a UTF-16 LE `.reg` file.
 
-Before the game opens, two independent checks must both hold the byte-exact Blob:
+Before the game opens, the supervisor proves the byte-exact Blob:
 
 1. The supervisor waits (bounded) for that prefix's own `wineserver -w`.
 2. It exports the key with `proton run reg export <key> <Z: path in a fresh private temp folder> /y`, and parses that
    UTF-16 LE file's `"Blob"=hex:` value.
-3. It reads `pfx/system.reg` as the second check.
+3. It reads `pfx/system.reg`, the file the game's Wine loads. This one must hold the Blob.
 
-The failure message says which check disagreed. `proton run reg query` is not used for the verdict: the measured Proton
+An export that exits with an error, writes no file or has no Blob is logged and does not stop the sync when
+`system.reg` holds the Blob. On SteamOS with Proton Experimental `reg export` exited -1 after an import that landed,
+and every sync stopped there. An export that holds another Blob stops the sync. The failure message says what each
+check found. `proton run reg query` is not used for the verdict: the measured Proton
 gives it 0 bytes of stdout even for a known key.
 
 Removal imports a delete `.reg`. It then requires `reg export` to write no file **and** `system.reg` to no longer have

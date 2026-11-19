@@ -10,6 +10,8 @@ Every HellForge document, by who it is for, and what an installation holds. To i
   fail), how to collect logs and where to ask.
 - [Using mods](mods.md): adding and removing mods, the Mods page, load order and playing with friends.
 - [Lua mods](lua-bridge.md): Bingus Shared Loader, HD2Runtime and their mods on HellForge, and the Lua bridge behind them.
+- [The HellForge war](hellforge-war.md): the war every HellForge player shares, its server and its mission reports.
+- [War scripts](war-script.md): your own major orders, dispatches, reward mail and planet modifiers on top of the war.
 - [Co-op and public lobbies](multiplayer.md): playing with friends and in public lobbies, and which settings decide
   who can join.
 - [Linux (Proton)](linux.md): the experimental Linux setup: installing, updating, sessions, co-op, account sync and
@@ -63,6 +65,8 @@ Reference and related pages:
   game's styles, set from code, with click handlers.
 - [Screens over the game](modding/overlay.md): for code mod authors; the SDK 17 screens, what each drawing call does,
   the input, the backdrop and the overlay host.
+- [Effects, enemies and the armory](modding/world.md): for code mod authors; SDK 21 particle effects on entities,
+  shared across the lobby, enemies near a point and the weapon on the armory's customize screen.
 - [Building a lobby browser](lobby-browser.md): for front-end developers drawing their own lobby browser on the ship's
   terminal; the SDK 16 calls, the terminal's visit, what each lobby says and the rules a browser keeps.
 
@@ -77,10 +81,15 @@ Reference and related pages:
   which game tables move or grow, and what each part of the level changes.
 - [Stats, live editing and events](internals-live.md): the stats pass at load, live editing, the in-game editor and live
   pipe, event sources and native edits.
+- [How the world calls work](internals-world.md): what the SDK 21 effect, enemy and armory calls read and call in
+  the engine, and how a shared effect reaches the other machines.
 - [Performance fixes in the engine](performance.md): what the mod loader changes so the game and HellForge do less
   work, and how to turn a fix off.
 - [Performance fixes in level generation](performance-loading.md): the fixes that make the game's level generation
   take less time or memory.
+- [Performance fixes for many enemies](performance-enemies.md): the fixes for missions with hundreds of enemies.
+- [Fixes to the game's own behaviour](gameplay-fixes.md): where the mod loader changes what the game gets wrong, such as
+  explosions knocking Helldivers down through cover.
 - [Crash guards in the renderer](crash-guards.md): the two crashes of the game's renderer that HellForge guards, and why
   each guard is safe.
 - [Steam Cloud stays in the profile](steam-cloud.md): how the `steam_api64.dll` stand-in keeps the game's cloud files in
@@ -140,10 +149,10 @@ On Linux, the graphical installer and native setup wizard do this instead; see
      Sharing, for example), or when SteamCMD cannot be set up, the Steam app downloads the supported build on
      your account. The wizard shows one
      `download_depot 553850 <depot> <manifest>` command per depot (the manifests pinned in
-     `supported-build.json`) to paste into the Steam console (`steam://open/console`), watches
-     `<Steam>/steamapps/content/app_553850/`, continues when every depot is complete, copies from there and can delete
-     the download afterwards. [Troubleshooting](troubleshooting.md#setup-cannot-find-the-supported-build) walks through
-     it.
+     `supported-build.json`) to paste into the Steam console (`steam://open/console`). It watches Steam's
+     `steamapps/content/app_553850/` folders, continues when every depot is complete, copies from there and can
+     delete the download afterwards.
+     [Troubleshooting](troubleshooting.md#setup-cannot-find-the-supported-build) walks through it.
 
    The normal game is not touched either way.
 2. Confirms with Steam that the signed-in account owns the game or has it through Steam Family Sharing. When the build

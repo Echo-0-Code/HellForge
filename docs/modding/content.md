@@ -64,6 +64,7 @@ constant is in the [SDK reference](../sdk-reference.md). The calls on this page,
 | `add_explosion` | 17 | an explosion type | its type (423 and up), or 0 | 512 |
 | `add_beam` | 17 | a beam type | its type (31 and up), or 0 | 512 |
 | `add_arc` | 17 | an arc type | its type (17 and up), or 0 | 512 |
+| `add_attachment` | 17 | an attachment on your weapons | its item id, or 0 | 1,024 |
 | `add_stratagem` | 4 | a stratagem | its type (150 and up), or 0 | 48 |
 | `add_stratagem_category` | 8 | a heading in the selection screen | a handle, or 0 | 28 |
 | `add_behaviour` | 4 | a behaviour | its id (694 and up), or 0 | 8 |
@@ -311,6 +312,9 @@ its model, its text and the components it owns. `own_components` lists up to 8 c
 (`{"WeaponMagazineComponentData", NULL}`); after `HF_EVENT_ENTITIES_READY`,
 `hf_record(mod, hf->weapon_entity(id), HfWeaponMagazine)` is the weapon's own record.
 
+Its loadout entry is always its own. `hf_set(mod, entity, LoadoutEntry, traits_1, HF_U32(<trait id>))` changes the
+armory's trait labels of this weapon only, and `hf_record` reads them.
+
 `own_all = 1` gives the weapon its own copy of every record its base has, as it does for an entity
 ([what a copy shares](#what-a-copy-shares)). An edit of the base never changes the weapon, and the weapon's edits never
 change the base. Older HellForge versions ignore it. The weapon's log names any component HellForge couldn't copy,
@@ -380,7 +384,8 @@ drum.weapon_count = 1;
   joint ([models](models.md)).
 - Its unit must load with the weapon. Put it in the weapon's own package ([a weapon of your own](#a-weapon-of-your-own))
   or in a session package. The game finds the package of a vanilla attachment's unit, but not of yours.
-- At most 128 attachments across all mods.
+- At most 1,024 attachments across all mods, weapon patterns among them. Each takes one catalogue item on each of its
+  weapons; when the catalogue is full, the session's backend log names the attachments left out.
 
 ### A weapon of your own
 

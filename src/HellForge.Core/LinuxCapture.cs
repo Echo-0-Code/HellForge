@@ -39,9 +39,11 @@ public static partial class LinuxCapture
     public const string RelayBinary = "capture-relay";
     public const string HelperInstaller = "allow-capture.sh";
     const string CertificateFile = "capture-ca.cer";
-    // The signing service's folders (capture-helper.sh): its run folder, readable while it runs, and the folder the helper
-    // hands the sealed account files over in, owned by the player's account.
-    public const string SignerRunFolder = "/run/hellforge-capture";
+    // The signing service's folders as the launcher reads them (capture-helper.sh). The service's own run folder,
+    // /run/hellforge-capture, is a link into /run/private, which only root may enter: systemd puts a DynamicUser service's
+    // preserved RuntimeDirectory there. So root copies the service's log, state and public CA into the evidence folder
+    // while it runs, and hands the sealed account files over in a folder it gives to the player's account.
+    public const string SignerEvidenceFolder = "/run/hellforge/capture-evidence";
     public const string SignerHandOverFolder = "/run/hellforge/capture-out";
     const string ProxyCopyName = "capture-proxy";
     const string CertificateRecordFile = "capture-ca.json";
@@ -601,9 +603,9 @@ public static partial class LinuxCapture
     }
 
     // The signing service runs as its own user, so its files reach the sync folder, where the launcher's flow reads them,
-    // by copy: the account files the helper handed over first (once), then the log, a start failure and the state. A state
-    // that says sealed waits for the account files. True once they are copied.
-    internal static bool MirrorSignerRun(string runFolder, string handOverFolder, string syncDir, bool accountFilesCopied)
+    // by copy: the account files the helper handed over first (once), then the log, a start failure and the state from the
+    // evidence folder root shares. A state that says sealed waits for the account files. True once they are copied.
+    internal static bool MirrorSignerRun(string evidenceFolder, string handOverFolder, string syncDir, bool accountFilesCopied)
     {
         try
         {
@@ -621,14 +623,19 @@ public static partial class LinuxCapture
                 CopyPrivate(Path.Combine(handOverFolder, SnapshotSeal.FileName), Path.Combine(syncDir, SnapshotSeal.FileName));
                 accountFilesCopied = true;
             }
-            CopyPrivate(Path.Combine(runFolder, "proxy.log"), Path.Combine(syncDir, "proxy.log"));
-            CopyPrivate(Path.Combine(runFolder, CaptureStart.FailureFile), Path.Combine(syncDir, CaptureStart.FailureFile));
-            if (CaptureState.Read(runFolder) is { } state && (!state.Sealed || accountFilesCopied))
-                CopyPrivate(Path.Combine(runFolder, CaptureState.FileName), Path.Combine(syncDir, CaptureState.FileName));
+            CopyPrivate(Path.Combine(evidenceFolder, "proxy.log"), Path.Combine(syncDir, "proxy.log"));
+            CopyPrivate(Path.Combine(evidenceFolder, CaptureStart.FailureFile), Path.Combine(syncDir, CaptureStart.FailureFile));
+            if (CaptureState.Read(evidenceFolder) is { } state && (!state.Sealed || accountFilesCopied))
+                CopyPrivate(Path.Combine(evidenceFolder, CaptureState.FileName), Path.Combine(syncDir, CaptureState.FileName));
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException) { }
         return accountFilesCopied;
     }
+
+    // The launcher opens the game once the service's public CA is there to import and its state, mirrored into the sync
+    // folder, says it listens. Both come from the evidence folder, which this account can read.
+    internal static bool SigningCaptureReady(string evidenceFolder, string syncDir) =>
+        File.Exists(CertificatePath(evidenceFolder)) && InventorySync.IsListening(syncDir);
 
     static void CopyPrivate(string from, string to)
     {
@@ -730,9 +737,9 @@ public static partial class LinuxCapture
                 .Where(folder => File.Exists(CertificateRecordPath(folder))).Order(StringComparer.Ordinal).ToArray()
             : [];
 
-    // Import the serialised Root certificate and prove it with a reg export file. `proton run` can drop reg.exe's
-    // stdout entirely, so no console answer is parsed: the export file and the prefix's system.reg must both hold the
-    // Blob. stdout and stderr stay apart in launcher.log only.
+    // Import the serialised Root certificate and prove it from the prefix's system.reg, checked against a reg export file.
+    // `proton run` can drop reg.exe's console output entirely, so no console answer is parsed. stdout and stderr stay
+    // apart in launcher.log only.
     public static void InstallCertificate(CertificateRecord record)
     {
         if (InventorySync.IsGameRunning())
@@ -751,8 +758,8 @@ public static partial class LinuxCapture
             InstallCertificateThroughWine(record, thumbprint, blob, reg, Path.Combine(folder, "capture-export.reg")));
     }
 
-    // One import, one bounded wait for the prefix's wineserver, then reg export to a private file and system.reg. Both
-    // checks must hold the Blob; the failure message says which one disagreed.
+    // One import, one bounded wait for the prefix's wineserver, then reg export to a private file and system.reg.
+    // system.reg must hold the Blob and the export must not hold another; the failure message says what each found.
     static void InstallCertificateThroughWine(CertificateRecord record, string thumbprint, byte[] blob, string reg,
         string exportPath)
     {
@@ -772,9 +779,16 @@ public static partial class LinuxCapture
         Note(record, "system.reg check: " + evidence);
         var versionAfter = PrefixVersion(record.Prefix);
         Note(record, PrefixVersionEvidence(versionBefore, versionAfter));
-        if (exportProblem != null || evidence != SystemRegExpected)
+        // system.reg, flushed by the prefix's wineserver, is what the game's Wine loads: with the Blob there the import landed.
+        // An export that could not run or found nothing does not undo that (SteamOS with Proton Experimental: reg export
+        // exited -1 after an import that landed, and every sync stopped, bug-report-0559); one that read another Blob does.
+        if (evidence != SystemRegExpected || exportProblem == ExportBlobMismatch)
             throw new InvalidOperationException(ExportFailure(exported, exportProblem, evidence, versionBefore, versionAfter));
+        if (exportProblem != null)
+            Note(record, "reg export did not confirm the Blob (" + exportProblem + "); system.reg holds it, so the certificate is in place");
     }
+
+    const string ExportBlobMismatch = "the export file's Blob does not match the certificate";
 
     static string? ExportBlobProblem(WineResult exported, string exportPath, string thumbprint, byte[] blob)
     {
@@ -784,7 +798,7 @@ public static partial class LinuxCapture
         var hex = ReadRegistryExportBlob(exportPath, thumbprint);
         if (hex == null) return "the export file has no Blob for the key";
         return string.Equals(hex, Convert.ToHexString(blob), StringComparison.OrdinalIgnoreCase)
-            ? null : "the export file's Blob does not match the certificate";
+            ? null : ExportBlobMismatch;
     }
 
     static void FlushWineserver(CertificateRecord record)
