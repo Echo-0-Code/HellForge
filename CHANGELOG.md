@@ -15,6 +15,10 @@ On `dev`, since 0.4.0-beta.
 - **Camouflage shapes of your own.** A data spec can add layers to one of the game's array textures after its own
   (a texture `edit` with `layers`). A LUT cell takes `[r, g, b, a]`, so a weapon paint can pick any camouflage layer,
   the game's or a mod's ([patterns](docs/modding/patterns.md#camouflage-shapes-on-weapons)).
+- **Vehicles with a model of their own.** A unit copy's `mesh` takes `"parts": true`: each object of the OBJ rides the
+  unit joint it is named after, so a vehicle's wheels steer and turn under a body of the mod's own. The copy keeps its
+  base's joints, so seats, damage zones and the gun mount still fit. The `vehicle-model` example is an M-102 under a
+  body of boxes ([new vehicles](docs/modding/vehicles.md)).
 - **Buttons over game menus.** A screen that is not modal can take the mouse's clicks inside its own boxes with the
   new `HfDraw.take_clicks`, so a mod's button can sit on the armory. The game gets neither the press nor its release;
   everything else still reaches it (#2, [overlay](docs/modding/overlay.md#click-boxes)).
