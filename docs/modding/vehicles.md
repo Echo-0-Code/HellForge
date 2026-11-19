@@ -29,8 +29,9 @@ static const HfEntityDef rally = {.size = sizeof(HfEntityDef), .name = "yourname
 ```
 
 Take a weapon off with `{HF_FIELD(Mount, slot0_entity), HF_U64(0)}`: the slot then carries nothing.
-Each seat is an interact zone of `Interactable`. Close one by setting its type to 0:
-`{HF_FIELD(Interactable, zone2_type), HF_U32(0)}` closes the FRV's roof seat. On the M-102, zones 0 to 4 are its five
+Each seat is an interact zone of `Interactable`. Close one by setting its type and its radius to 0, as unused zones
+have them: `{HF_FIELD(Interactable, zone2_type), HF_U32(0)}` and `{HF_FIELD(Interactable, zone2_radius), HF_F32(0)}`
+close the FRV's roof seat. With the type alone, the seat can't be entered but still shows its prompt. On the M-102, zones 0 to 4 are its five
 seats (type 19), and zone 2 is the roof seat, which the M-103 turns into its supply rack (type 9).
 
 An exosuit's arms are mounts: give it arms of your own with `mount`, as the `vehicle-variants` example does. A ground

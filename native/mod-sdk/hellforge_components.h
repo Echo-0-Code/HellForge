@@ -4936,39 +4936,71 @@ HF_ASSERT_OFFSET(HfStatusEffectReceiver, duration_7_multiplier, 46596);
 #define HfInteractable_INFO "InteractableComponentData", 25480438u
 typedef struct HfInteractable
 {
-    uint8_t _unknown_00[48];
+    uint8_t _unknown_00[12];
+    float zone0_radius;                          /* +0x0C interact zone 0: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) [respawn?] */
+    uint8_t _unknown_10[32];
     uint32_t zone0_type;                         /* +0x30 interact zone 0: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
-    uint8_t _unknown_34[132];
+    uint8_t _unknown_34[96];
+    float zone1_radius;                          /* +0x94 interact zone 1: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) [respawn?] */
+    uint8_t _unknown_98[32];
     uint32_t zone1_type;                         /* +0xB8 interact zone 1: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
-    uint8_t _unknown_BC[132];
+    uint8_t _unknown_BC[96];
+    float zone2_radius;                          /* +0x11C interact zone 2: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) [respawn?] */
+    uint8_t _unknown_120[32];
     uint32_t zone2_type;                         /* +0x140 interact zone 2: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
-    uint8_t _unknown_144[132];
+    uint8_t _unknown_144[96];
+    float zone3_radius;                          /* +0x1A4 interact zone 3: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) [respawn?] */
+    uint8_t _unknown_1A8[32];
     uint32_t zone3_type;                         /* +0x1C8 interact zone 3: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
-    uint8_t _unknown_1CC[132];
+    uint8_t _unknown_1CC[96];
+    float zone4_radius;                          /* +0x22C interact zone 4: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) [respawn?] */
+    uint8_t _unknown_230[32];
     uint32_t zone4_type;                         /* +0x250 interact zone 4: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
-    uint8_t _unknown_254[132];
+    uint8_t _unknown_254[96];
+    float zone5_radius;                          /* +0x2B4 interact zone 5: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) [respawn?] */
+    uint8_t _unknown_2B8[32];
     uint32_t zone5_type;                         /* +0x2D8 interact zone 5: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
-    uint8_t _unknown_2DC[132];
+    uint8_t _unknown_2DC[96];
+    float zone6_radius;                          /* +0x33C interact zone 6: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) [respawn?] */
+    uint8_t _unknown_340[32];
     uint32_t zone6_type;                         /* +0x360 interact zone 6: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
-    uint8_t _unknown_364[132];
+    uint8_t _unknown_364[96];
+    float zone7_radius;                          /* +0x3C4 interact zone 7: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) [respawn?] */
+    uint8_t _unknown_3C8[32];
     uint32_t zone7_type;                         /* +0x3E8 interact zone 7: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
     uint8_t _unknown_3EC[100];
 } HfInteractable;
 HF_ASSERT_SIZE(HfInteractable, 1104);
+HF_ASSERT_OFFSET(HfInteractable, zone0_radius, 12);
+#define HF_TYPE_Interactable_zone0_radius HF_TYPE_F32
 HF_ASSERT_OFFSET(HfInteractable, zone0_type, 48);
 #define HF_TYPE_Interactable_zone0_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone1_radius, 148);
+#define HF_TYPE_Interactable_zone1_radius HF_TYPE_F32
 HF_ASSERT_OFFSET(HfInteractable, zone1_type, 184);
 #define HF_TYPE_Interactable_zone1_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone2_radius, 284);
+#define HF_TYPE_Interactable_zone2_radius HF_TYPE_F32
 HF_ASSERT_OFFSET(HfInteractable, zone2_type, 320);
 #define HF_TYPE_Interactable_zone2_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone3_radius, 420);
+#define HF_TYPE_Interactable_zone3_radius HF_TYPE_F32
 HF_ASSERT_OFFSET(HfInteractable, zone3_type, 456);
 #define HF_TYPE_Interactable_zone3_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone4_radius, 556);
+#define HF_TYPE_Interactable_zone4_radius HF_TYPE_F32
 HF_ASSERT_OFFSET(HfInteractable, zone4_type, 592);
 #define HF_TYPE_Interactable_zone4_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone5_radius, 692);
+#define HF_TYPE_Interactable_zone5_radius HF_TYPE_F32
 HF_ASSERT_OFFSET(HfInteractable, zone5_type, 728);
 #define HF_TYPE_Interactable_zone5_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone6_radius, 828);
+#define HF_TYPE_Interactable_zone6_radius HF_TYPE_F32
 HF_ASSERT_OFFSET(HfInteractable, zone6_type, 864);
 #define HF_TYPE_Interactable_zone6_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone7_radius, 964);
+#define HF_TYPE_Interactable_zone7_radius HF_TYPE_F32
 HF_ASSERT_OFFSET(HfInteractable, zone7_type, 1000);
 #define HF_TYPE_Interactable_zone7_type HF_TYPE_U32
 
