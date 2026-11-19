@@ -389,6 +389,8 @@ On `dev`, since 0.4.0-beta.
   game build 25480438, so `function` and `hook_function` answered "not a mapped function" for the rest, `UnitWorldPose`,
   `UnitNode` and `LightSetEnabled` among them. It now has room for 1,024, and a mappings update that outgrows that fails
   the build (#10).
+- **40,960 catalogue items again.** The larger entity table made the game state's arrays stay in place, so the game
+  kept 4,096 catalogue items and the backend refused mod paints past them. Both now grow the same block together.
 - **Windows: HellForge started from Steam as a non-Steam game finds Steam.** Steam gives such a shortcut an app id of
   its own, and the Steam check and the game inherited it, so they asked Steam about the shortcut instead of
   HELLDIVERS 2. The launcher and the CLI now drop the shortcut's ids as they start (#434).
