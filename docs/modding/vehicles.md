@@ -57,6 +57,8 @@ model sitting that way). Each object in the file rides the joint it is named aft
 | a joint's name, such as `l_front_rotation` | turns and moves with that joint |
 | a joint's name with Blender's number, `l_front_rotation.001` | the same joint |
 
+Blender can also write the OBJ Z-up (export with forward Y, up Z) and the mesh then takes `"yUp": false`: Blender's axes are the unit's own.
+
 Put a part where its joint is. `HellForge.Cli unit-joints --unit <unit>` lists a unit's joints with their positions.
 The M-102's are:
 
@@ -68,6 +70,24 @@ The M-102's are:
 | `l_rear_rotation` | rear left wheel | -0.907, -1.647, 0.094 |
 | `r_rear_rotation` | rear right wheel | 0.904, -1.647, 0.094 |
 | `steering_wheel` | the steering wheel | -0.361, 0.797, 1.038 |
+
+Other joints of the M-102 a part can ride: `hood` (0, 1.23, 1.25), `engine` (0, 1.57, 0.95), the doors `door_fwd_l`
+(-0.77, 1.04, 1.01), `door_fwd_r`, `door_bck_l` (-0.74, 0.09, 1.03), `door_bck_r`, the roof lids `l_top_lid` (-0.37,
+0.27, 1.59) and `r_top_lid`, `gun_mount` (0, -1.20, 1.65), and each corner's suspension (`l_f_upper_wishbone`,
+`l_f_lower_wishbone`, `l_front_steering` and so on). The M-103 and M-104 have units of their own with the same joints.
+
+An exosuit's legs are joints too, so a body in parts walks with them. The EXO-45's unit (the EXO-49, 51 and 55 share
+it) has, among others:
+
+| Joint | Part | Position (x, y, z) |
+|---|---|---|
+| `boss` | the hips (the main bone) | 0, -0.54, 2.06 |
+| `thigh_l`, `thigh_r` | upper legs | ∓0.87, -0.62, 2.13 |
+| `knee_upper_l`, `knee_upper_r` | knees | -0.87, -0.03, 1.34 / 0.85, 0.02, 1.37 |
+| `knee_lower_l`, `knee_lower_r` | lower legs | -0.87, -0.42, 1.09 / 0.86, -0.37, 1.11 |
+| `foot_l`, `foot_r` | feet | ∓0.87, 0, 0.22 |
+| `cockpit` | the cockpit, which turns with the aim | 0, -0.49, 2.93 |
+| `attach_turret_l`, `attach_turret_r` | where the arms mount | ∓1.05, -0.43, 3.28 |
 
 A vehicle's meshes are split into groups by material. A part goes in the first group whose bones reach its joint and
 draws with that group's material: the M-102's wheels draw with its tyre material and the body with its body material.
