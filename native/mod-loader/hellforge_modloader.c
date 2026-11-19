@@ -556,7 +556,6 @@ static void ChannelInstall(uintptr_t game);
 #include "warbond_pager.c" /* after warbond_list.c: the Acquisition Center's pager past 32 cards */
 #include "warbond_texts.c" /* after warbond_list.c: the spent and unlock texts in a mod warbond's currency */
 #include "warbond_showcase.c" /* after warbond_texts.c: the Helldiver and background beside a mod warbond's card */
-#include "customize_list.c" /* after warbond_showcase.c: more than 64 cards on a weapon's customize screen */
 #include "terminal_camera.c" /* before terminal.c: the terminal starts its glide */
 #include "terminal.c"
 #include "abilities.c"
