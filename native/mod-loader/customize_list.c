@@ -5,7 +5,7 @@
  * 75 instructions that reach those fields read and write them CL_SHIFT further on (the same length, every byte pinned).
  * S keeps a copy of the first 64 entries for the code that still walks S itself. Off with HELLFORGE_CUSTOMIZE_LIST=0.
  * registered-items.json says when it is on ("customizeCards"), and only then does the backend serve a weapon more than
- * RegisteredItems.PatternsPerWeapon mods' patterns. Included after warbond_showcase.c. */
+ * RegisteredItems.PatternsPerWeapon mods' patterns. Included by patterns.c. */
 #define CL_CAP 127u                 /* the most an imm8 bound says */
 #define CL_SHIFT 0x19C0u            /* the fields move from S+0x640 to frame+0x2000 */
 #define CL_ENTRIES 0x40u
