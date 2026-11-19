@@ -466,6 +466,16 @@
    "stride": 136,
    "type": 1144477517
   },
+  "VehicleComponentData": {
+   "offset": 1385984,
+   "header": "0d2bebea4c444c44010000000d2bebea583201000100000000000000",
+   "index": 91,
+   "indices": 40,
+   "records": 21,
+   "recordOffset": 640,
+   "stride": 3704,
+   "type": 3941280525
+  },
   "VehicleMotionComponentData": {
    "offset": 18933432,
    "header": "4354b6834c444c44010000004354b683b01a00000100000000000000",

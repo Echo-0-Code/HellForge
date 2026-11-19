@@ -10084,6 +10084,34 @@
           "verified": false,
           "source": "game DL type library InteractZoneInfo +0x4; FileDiver generated_entities (M-102 zones)"
         },
+        "zone0_joint": {
+          "offset": 20,
+          "type": "u32",
+          "meaning": "interact zone 0: the joint it sits on (thin hash; the M-102 driver zone 3 uses interact_driver); a moved joint (a unit copy's \"joints\") moves the zone",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone0_offset_x": {
+          "offset": 24,
+          "type": "f32",
+          "meaning": "interact zone 0: its offset from its joint, x (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone0_offset_y": {
+          "offset": 28,
+          "type": "f32",
+          "meaning": "interact zone 0: its offset from its joint, y (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone0_offset_z": {
+          "offset": 32,
+          "type": "f32",
+          "meaning": "interact zone 0: its offset from its joint, z (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
         "zone0_type": {
           "offset": 48,
           "type": "u32",
@@ -10097,6 +10125,34 @@
           "meaning": "interact zone 1: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt)",
           "verified": false,
           "source": "game DL type library InteractZoneInfo +0x4; FileDiver generated_entities (M-102 zones)"
+        },
+        "zone1_joint": {
+          "offset": 156,
+          "type": "u32",
+          "meaning": "interact zone 1: the joint it sits on (thin hash; the M-102 driver zone 3 uses interact_driver); a moved joint (a unit copy's \"joints\") moves the zone",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone1_offset_x": {
+          "offset": 160,
+          "type": "f32",
+          "meaning": "interact zone 1: its offset from its joint, x (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone1_offset_y": {
+          "offset": 164,
+          "type": "f32",
+          "meaning": "interact zone 1: its offset from its joint, y (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone1_offset_z": {
+          "offset": 168,
+          "type": "f32",
+          "meaning": "interact zone 1: its offset from its joint, z (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
         },
         "zone1_type": {
           "offset": 184,
@@ -10112,6 +10168,34 @@
           "verified": false,
           "source": "game DL type library InteractZoneInfo +0x4; FileDiver generated_entities (M-102 zones)"
         },
+        "zone2_joint": {
+          "offset": 292,
+          "type": "u32",
+          "meaning": "interact zone 2: the joint it sits on (thin hash; the M-102 driver zone 3 uses interact_driver); a moved joint (a unit copy's \"joints\") moves the zone",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone2_offset_x": {
+          "offset": 296,
+          "type": "f32",
+          "meaning": "interact zone 2: its offset from its joint, x (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone2_offset_y": {
+          "offset": 300,
+          "type": "f32",
+          "meaning": "interact zone 2: its offset from its joint, y (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone2_offset_z": {
+          "offset": 304,
+          "type": "f32",
+          "meaning": "interact zone 2: its offset from its joint, z (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
         "zone2_type": {
           "offset": 320,
           "type": "u32",
@@ -10125,6 +10209,34 @@
           "meaning": "interact zone 3: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt)",
           "verified": false,
           "source": "game DL type library InteractZoneInfo +0x4; FileDiver generated_entities (M-102 zones)"
+        },
+        "zone3_joint": {
+          "offset": 428,
+          "type": "u32",
+          "meaning": "interact zone 3: the joint it sits on (thin hash; the M-102 driver zone 3 uses interact_driver); a moved joint (a unit copy's \"joints\") moves the zone",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone3_offset_x": {
+          "offset": 432,
+          "type": "f32",
+          "meaning": "interact zone 3: its offset from its joint, x (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone3_offset_y": {
+          "offset": 436,
+          "type": "f32",
+          "meaning": "interact zone 3: its offset from its joint, y (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone3_offset_z": {
+          "offset": 440,
+          "type": "f32",
+          "meaning": "interact zone 3: its offset from its joint, z (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
         },
         "zone3_type": {
           "offset": 456,
@@ -10140,6 +10252,34 @@
           "verified": false,
           "source": "game DL type library InteractZoneInfo +0x4; FileDiver generated_entities (M-102 zones)"
         },
+        "zone4_joint": {
+          "offset": 564,
+          "type": "u32",
+          "meaning": "interact zone 4: the joint it sits on (thin hash; the M-102 driver zone 3 uses interact_driver); a moved joint (a unit copy's \"joints\") moves the zone",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone4_offset_x": {
+          "offset": 568,
+          "type": "f32",
+          "meaning": "interact zone 4: its offset from its joint, x (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone4_offset_y": {
+          "offset": 572,
+          "type": "f32",
+          "meaning": "interact zone 4: its offset from its joint, y (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone4_offset_z": {
+          "offset": 576,
+          "type": "f32",
+          "meaning": "interact zone 4: its offset from its joint, z (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
         "zone4_type": {
           "offset": 592,
           "type": "u32",
@@ -10153,6 +10293,34 @@
           "meaning": "interact zone 5: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt)",
           "verified": false,
           "source": "game DL type library InteractZoneInfo +0x4; FileDiver generated_entities (M-102 zones)"
+        },
+        "zone5_joint": {
+          "offset": 700,
+          "type": "u32",
+          "meaning": "interact zone 5: the joint it sits on (thin hash; the M-102 driver zone 3 uses interact_driver); a moved joint (a unit copy's \"joints\") moves the zone",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone5_offset_x": {
+          "offset": 704,
+          "type": "f32",
+          "meaning": "interact zone 5: its offset from its joint, x (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone5_offset_y": {
+          "offset": 708,
+          "type": "f32",
+          "meaning": "interact zone 5: its offset from its joint, y (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone5_offset_z": {
+          "offset": 712,
+          "type": "f32",
+          "meaning": "interact zone 5: its offset from its joint, z (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
         },
         "zone5_type": {
           "offset": 728,
@@ -10168,6 +10336,34 @@
           "verified": false,
           "source": "game DL type library InteractZoneInfo +0x4; FileDiver generated_entities (M-102 zones)"
         },
+        "zone6_joint": {
+          "offset": 836,
+          "type": "u32",
+          "meaning": "interact zone 6: the joint it sits on (thin hash; the M-102 driver zone 3 uses interact_driver); a moved joint (a unit copy's \"joints\") moves the zone",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone6_offset_x": {
+          "offset": 840,
+          "type": "f32",
+          "meaning": "interact zone 6: its offset from its joint, x (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone6_offset_y": {
+          "offset": 844,
+          "type": "f32",
+          "meaning": "interact zone 6: its offset from its joint, y (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone6_offset_z": {
+          "offset": 848,
+          "type": "f32",
+          "meaning": "interact zone 6: its offset from its joint, z (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
         "zone6_type": {
           "offset": 864,
           "type": "u32",
@@ -10182,12 +10378,276 @@
           "verified": false,
           "source": "game DL type library InteractZoneInfo +0x4; FileDiver generated_entities (M-102 zones)"
         },
+        "zone7_joint": {
+          "offset": 972,
+          "type": "u32",
+          "meaning": "interact zone 7: the joint it sits on (thin hash; the M-102 driver zone 3 uses interact_driver); a moved joint (a unit copy's \"joints\") moves the zone",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone7_offset_x": {
+          "offset": 976,
+          "type": "f32",
+          "meaning": "interact zone 7: its offset from its joint, x (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone7_offset_y": {
+          "offset": 980,
+          "type": "f32",
+          "meaning": "interact zone 7: its offset from its joint, y (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
+        "zone7_offset_z": {
+          "offset": 984,
+          "type": "f32",
+          "meaning": "interact zone 7: its offset from its joint, z (metres)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo (0x88 bytes from +0x8); FileDiver generated_entities: the M-102's seat zones 0-4"
+        },
         "zone7_type": {
           "offset": 1000,
           "type": "u32",
           "meaning": "interact zone 7: what using it does (19 enters a seat, 9 a supply rack, 0 none)",
           "verified": false,
           "source": "game DL type library InteractZoneInfo +0x28; FileDiver generated_entities (M-102 zones 0-4 are 19, M-103 zone 2 is 9)"
+        }
+      },
+      "applies": "respawn",
+      "appliesVerified": false,
+      "appliesSource": "entities copy their type's records when they are made"
+    },
+    "Vehicle": {
+      "component": "VehicleComponentData",
+      "index": 91,
+      "stride": 3704,
+      "layout": "25480438",
+      "meaning": "a vehicle: its states, 32 WheelInfo records of 0x40 from +0x8 (which joints each physics wheel drives), effects and HUD",
+      "fields": {
+        "wheel0_joint_a": {
+          "offset": 24,
+          "type": "u32",
+          "meaning": "physics wheel 0: a joint hash the wheel names first (one per wheel on the FRV; meaning unproven)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel0_steering_joint": {
+          "offset": 28,
+          "type": "u32",
+          "meaning": "physics wheel 0: the joint the wheel steers (FRV front wheels: l_front_steering, r_front_steering; 0 on the rear)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel0_rotation_joint": {
+          "offset": 32,
+          "type": "u32",
+          "meaning": "physics wheel 0: the joint the wheel spins (FRV: l_rear_rotation ...)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel0_joint_d": {
+          "offset": 36,
+          "type": "u32",
+          "meaning": "physics wheel 0: a fourth joint hash per wheel (meaning unproven)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel1_joint_a": {
+          "offset": 88,
+          "type": "u32",
+          "meaning": "physics wheel 1: a joint hash the wheel names first (one per wheel on the FRV; meaning unproven)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel1_steering_joint": {
+          "offset": 92,
+          "type": "u32",
+          "meaning": "physics wheel 1: the joint the wheel steers (FRV front wheels: l_front_steering, r_front_steering; 0 on the rear)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel1_rotation_joint": {
+          "offset": 96,
+          "type": "u32",
+          "meaning": "physics wheel 1: the joint the wheel spins (FRV: l_rear_rotation ...)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel1_joint_d": {
+          "offset": 100,
+          "type": "u32",
+          "meaning": "physics wheel 1: a fourth joint hash per wheel (meaning unproven)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel2_joint_a": {
+          "offset": 152,
+          "type": "u32",
+          "meaning": "physics wheel 2: a joint hash the wheel names first (one per wheel on the FRV; meaning unproven)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel2_steering_joint": {
+          "offset": 156,
+          "type": "u32",
+          "meaning": "physics wheel 2: the joint the wheel steers (FRV front wheels: l_front_steering, r_front_steering; 0 on the rear)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel2_rotation_joint": {
+          "offset": 160,
+          "type": "u32",
+          "meaning": "physics wheel 2: the joint the wheel spins (FRV: l_rear_rotation ...)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel2_joint_d": {
+          "offset": 164,
+          "type": "u32",
+          "meaning": "physics wheel 2: a fourth joint hash per wheel (meaning unproven)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel3_joint_a": {
+          "offset": 216,
+          "type": "u32",
+          "meaning": "physics wheel 3: a joint hash the wheel names first (one per wheel on the FRV; meaning unproven)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel3_steering_joint": {
+          "offset": 220,
+          "type": "u32",
+          "meaning": "physics wheel 3: the joint the wheel steers (FRV front wheels: l_front_steering, r_front_steering; 0 on the rear)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel3_rotation_joint": {
+          "offset": 224,
+          "type": "u32",
+          "meaning": "physics wheel 3: the joint the wheel spins (FRV: l_rear_rotation ...)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel3_joint_d": {
+          "offset": 228,
+          "type": "u32",
+          "meaning": "physics wheel 3: a fourth joint hash per wheel (meaning unproven)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel4_joint_a": {
+          "offset": 280,
+          "type": "u32",
+          "meaning": "physics wheel 4: a joint hash the wheel names first (one per wheel on the FRV; meaning unproven)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel4_steering_joint": {
+          "offset": 284,
+          "type": "u32",
+          "meaning": "physics wheel 4: the joint the wheel steers (FRV front wheels: l_front_steering, r_front_steering; 0 on the rear)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel4_rotation_joint": {
+          "offset": 288,
+          "type": "u32",
+          "meaning": "physics wheel 4: the joint the wheel spins (FRV: l_rear_rotation ...)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel4_joint_d": {
+          "offset": 292,
+          "type": "u32",
+          "meaning": "physics wheel 4: a fourth joint hash per wheel (meaning unproven)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel5_joint_a": {
+          "offset": 344,
+          "type": "u32",
+          "meaning": "physics wheel 5: a joint hash the wheel names first (one per wheel on the FRV; meaning unproven)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel5_steering_joint": {
+          "offset": 348,
+          "type": "u32",
+          "meaning": "physics wheel 5: the joint the wheel steers (FRV front wheels: l_front_steering, r_front_steering; 0 on the rear)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel5_rotation_joint": {
+          "offset": 352,
+          "type": "u32",
+          "meaning": "physics wheel 5: the joint the wheel spins (FRV: l_rear_rotation ...)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel5_joint_d": {
+          "offset": 356,
+          "type": "u32",
+          "meaning": "physics wheel 5: a fourth joint hash per wheel (meaning unproven)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel6_joint_a": {
+          "offset": 408,
+          "type": "u32",
+          "meaning": "physics wheel 6: a joint hash the wheel names first (one per wheel on the FRV; meaning unproven)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel6_steering_joint": {
+          "offset": 412,
+          "type": "u32",
+          "meaning": "physics wheel 6: the joint the wheel steers (FRV front wheels: l_front_steering, r_front_steering; 0 on the rear)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel6_rotation_joint": {
+          "offset": 416,
+          "type": "u32",
+          "meaning": "physics wheel 6: the joint the wheel spins (FRV: l_rear_rotation ...)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel6_joint_d": {
+          "offset": 420,
+          "type": "u32",
+          "meaning": "physics wheel 6: a fourth joint hash per wheel (meaning unproven)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel7_joint_a": {
+          "offset": 472,
+          "type": "u32",
+          "meaning": "physics wheel 7: a joint hash the wheel names first (one per wheel on the FRV; meaning unproven)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel7_steering_joint": {
+          "offset": 476,
+          "type": "u32",
+          "meaning": "physics wheel 7: the joint the wheel steers (FRV front wheels: l_front_steering, r_front_steering; 0 on the rear)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel7_rotation_joint": {
+          "offset": 480,
+          "type": "u32",
+          "meaning": "physics wheel 7: the joint the wheel spins (FRV: l_rear_rotation ...)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
+        },
+        "wheel7_joint_d": {
+          "offset": 484,
+          "type": "u32",
+          "meaning": "physics wheel 7: a fourth joint hash per wheel (meaning unproven)",
+          "verified": false,
+          "source": "game DL type library WheelInfo (0x40 bytes from +0x8); FileDiver generated_entities: the M-102 wheels 0-3 name l_rear, r_rear, l_front and r_front joints, the order of its physics VRW wheels"
         }
       },
       "applies": "respawn",

@@ -19,6 +19,10 @@ On `dev`, since 0.4.0-beta.
 - **Fewer seats or no gun on a vehicle copy.** `Interactable` is mapped: set a seat's interact zone type and radius to 0
   to close it (the FRV's roof seat is zone 2), and `Mount.slot0_entity` to 0 to take its gun off
   ([new vehicles](docs/modding/vehicles.md)).
+- **Vehicles with physics of their own, and seats that move.** A unit copy's `physics` takes a physics file from the
+  mod folder or byte edits on its base's, and its `joints` moves seats, interact points and other joints, with what
+  rides them. `Vehicle` maps which joints each physics wheel turns, and `Interactable` each zone's joint and offset
+  ([new vehicles](docs/modding/vehicles.md#physics-of-its-own)).
 - **Buttons over game menus.** A screen that is not modal can take the mouse's clicks inside its own boxes with the
   new `HfDraw.take_clicks`, so a mod's button can sit on the armory. The game gets neither the press nor its release;
   everything else still reaches it (#2, [overlay](docs/modding/overlay.md#click-boxes)).

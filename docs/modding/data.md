@@ -129,6 +129,8 @@ mod, never a game resource's name. The copy can then be changed, in this order:
     vehicle's wheels turn ([new vehicles](vehicles.md#a-model-of-its-own)).
 
 A `unit` copy also gets its base's physics under its own name, because the engine finds a unit's physics by its name.
+Its `physics` brings a physics file of the mod's own or byte edits on the copied one, and its `joints` moves joints to
+new rest positions ([new vehicles](vehicles.md#physics-of-its-own)).
 
 ### include
 
