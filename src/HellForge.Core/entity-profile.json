@@ -186,6 +186,16 @@
    "stride": 568,
    "type": 2844504406
   },
+  "InteractableComponentData": {
+   "offset": 26651752,
+   "header": "db29cafc4c444c4401000000db29cafcb0a709000100000000000000",
+   "index": 244,
+   "indices": 1114,
+   "records": 557,
+   "recordOffset": 17824,
+   "stride": 1104,
+   "type": 4241107419
+  },
   "InventoryComponentData": {
    "offset": 26614280,
    "header": "3bb4da8a4c444c44010000003bb4da8ab03b00000100000000000000",

@@ -28,6 +28,11 @@ static const HfEntityDef rally = {.size = sizeof(HfEntityDef), .name = "yourname
     .designation = "M-102R", .title = "Rally FRV", .description = "An M-102 with a quicker steering rack."};
 ```
 
+Take a weapon off with `{HF_FIELD(Mount, slot0_entity), HF_U64(0)}`: the slot then carries nothing.
+Each seat is an interact zone of `Interactable`. Close one by setting its type to 0:
+`{HF_FIELD(Interactable, zone2_type), HF_U32(0)}` closes the FRV's roof seat. On the M-102, zones 0 to 4 are its five
+seats (type 19), and zone 2 is the roof seat, which the M-103 turns into its supply rack (type 9).
+
 An exosuit's arms are mounts: give it arms of your own with `mount`, as the `vehicle-variants` example does. A ground
 vehicle ignores `model_from`, because its seats, wheels, tracks and damage zones name its own model's parts.
 
@@ -71,10 +76,19 @@ The M-102's are:
 | `r_rear_rotation` | rear right wheel | 0.904, -1.647, 0.094 |
 | `steering_wheel` | the steering wheel | -0.361, 0.797, 1.038 |
 
-Other joints of the M-102 a part can ride: `hood` (0, 1.23, 1.25), `engine` (0, 1.57, 0.95), the doors `door_fwd_l`
-(-0.77, 1.04, 1.01), `door_fwd_r`, `door_bck_l` (-0.74, 0.09, 1.03), `door_bck_r`, the roof lids `l_top_lid` (-0.37,
-0.27, 1.59) and `r_top_lid`, `gun_mount` (0, -1.20, 1.65), and each corner's suspension (`l_f_upper_wishbone`,
-`l_f_lower_wishbone`, `l_front_steering` and so on). The M-103 and M-104 have units of their own with the same joints.
+Other joints of the M-102 a part can ride:
+
+| Joint | Position (x, y, z) |
+|---|---|
+| `hood` | 0, 1.23, 1.25 |
+| `engine` | 0, 1.57, 0.95 |
+| `door_fwd_l`, `door_fwd_r` | ∓0.77, 1.04, 1.01 |
+| `door_bck_l`, `door_bck_r` | ∓0.74, 0.09, 1.03 |
+| `l_top_lid`, `r_top_lid` (roof lids) | -0.37, 0.27, 1.59 / 0.35, 0.27, 1.59 |
+| `gun_mount` | 0, -1.20, 1.65 |
+
+Each corner's suspension has joints too, such as `l_f_upper_wishbone`, `l_f_lower_wishbone` and `l_front_steering`.
+The M-103 and M-104 have units of their own with the same joints.
 
 An exosuit's legs are joints too, so a body in parts walks with them. The EXO-45's unit (the EXO-49, 51 and 55 share
 it) has, among others:
@@ -114,7 +128,7 @@ The drop loads the package of its first payload entity, your vehicle's.
 ## What stays the base's
 
 - Physics and collision, and so how it drives: the drivetrain is in the physics resource.
-- Animations, seats and where players sit, the camera, and the HUD.
+- Animations, where players sit, the camera, and the HUD. A seat can be closed, not moved or added.
 - Damage zones and where they are.
 - Room: the game's vehicle tables have space for about 3 new tracked vehicles and 13 ground vehicles in all.
 

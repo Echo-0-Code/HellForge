@@ -1414,6 +1414,16 @@ static const SdkField kSdkFieldsStatusEffectReceiver[] = {
     {"duration_7_type", 46592, 4, HF_TYPE_U32, HF_APPLIES_NOW, REF_NONE},
     {"duration_7_multiplier", 46596, 4, HF_TYPE_F32, HF_APPLIES_NOW, REF_NONE},
 };
+static const SdkField kSdkFieldsInteractable[] = {
+    {"zone0_type", 48, 4, HF_TYPE_U32, HF_APPLIES_RESPAWN, REF_NONE},
+    {"zone1_type", 184, 4, HF_TYPE_U32, HF_APPLIES_RESPAWN, REF_NONE},
+    {"zone2_type", 320, 4, HF_TYPE_U32, HF_APPLIES_RESPAWN, REF_NONE},
+    {"zone3_type", 456, 4, HF_TYPE_U32, HF_APPLIES_RESPAWN, REF_NONE},
+    {"zone4_type", 592, 4, HF_TYPE_U32, HF_APPLIES_RESPAWN, REF_NONE},
+    {"zone5_type", 728, 4, HF_TYPE_U32, HF_APPLIES_RESPAWN, REF_NONE},
+    {"zone6_type", 864, 4, HF_TYPE_U32, HF_APPLIES_RESPAWN, REF_NONE},
+    {"zone7_type", 1000, 4, HF_TYPE_U32, HF_APPLIES_RESPAWN, REF_NONE},
+};
 static const SdkComponent kSdkComponents[] = {
     {"ProjectileWeapon", "ProjectileWeaponComponentData", 25480438u, 616u, kSdkFieldsProjectileWeapon, 45, 0, 321},
     {"WeaponData", "WeaponDataComponentData", 25480438u, 1232u, kSdkFieldsWeaponData, 21, 0, 236},
@@ -1489,4 +1499,5 @@ static const SdkComponent kSdkComponents[] = {
     {"AiEnemy", "AiEnemyComponentData", 25480438u, 732u, kSdkFieldsAiEnemy, 17, 0, 302},
     {"Locomotion", "LocomotionComponentData", 25480438u, 4624u, kSdkFieldsLocomotion, 2, 0, 311},
     {"StatusEffectReceiver", "StatusEffectReceiverComponentData", 25480438u, 46600u, kSdkFieldsStatusEffectReceiver, 148, 0, 307},
+    {"Interactable", "InteractableComponentData", 25480438u, 1104u, kSdkFieldsInteractable, 8, 0, 244},
 };
