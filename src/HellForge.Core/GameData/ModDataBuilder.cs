@@ -376,7 +376,7 @@ public static class ModDataBuilder
             ShaderSplice.RenameMaterial(gpu, Hash(copy.Name));
             ShaderSplice.RenameTemplates(gpu, Hash(copy.Name));
         }
-        if (copy.Joints is { } joints) UnitJoints.Move(main, joints);
+        if (copy.Joints is { } joints) UnitJoints.Move(main, joints, copy.JointParents);
         return copy.Mesh is { } mesh ? ReplaceMesh(mesh, main, gpu, source.Stream, modFolder) : new(main, gpu, source.Stream);
     }
 

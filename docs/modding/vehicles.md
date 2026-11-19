@@ -137,6 +137,20 @@ Every joint below a moved one moves with it, and so do physics actors and intera
   "joints": { "attach_driver": [0, 0.1, 0.75], "interact_driver": [-0.9, 0.1, 0.3], "steering_wheel": [0, 0.5, 1.0] } }
 ```
 
+The game animates a vehicle's bones from its base's clips: the FRV's suspension arms, its steering joints and its
+`steering_wheel`. A bone is drawn where the clip puts it relative to its parent, not where `joints` moved it. A
+joint below a bone (the FRV's `*_rotation` wheel joints) therefore follows the base's suspension at the base's size. To
+keep such a joint where you put it, give it a parent the clips leave alone, such as `boss`:
+
+```json
+"joints": { "l_rear_rotation": { "at": [-0.27, -0.65, 0.06], "parent": "boss" } }
+```
+
+The joint keeps its world rotation, and the new parent must come before it in the unit's joints (a lower index). A
+wheel hung from `boss` spins but no longer steers or rides the suspension. The unit's bones are listed in its bones
+resource (the unit's +0x08 names it); the FRV's include every suspension joint and `steering_wheel`, but not `boss`,
+the `*_rotation` joints, the seats or the interact points.
+
 A seat is two joints: where the player sits (`attach_driver` and its passengers) and where they get in (the interact
 zone's joint, `interact_driver` and its passengers). The M-102's are:
 
@@ -148,7 +162,11 @@ zone's joint, `interact_driver` and its passengers). The M-102's are:
 | rear right | `#46540ee8` (0.36, -0.21, 0.60) | `#02e8c349` (1.76, -0.21) | 1 |
 | roof gunner | the gun mount | `#1bec92c7` (0, -2.75, 0.39) | 2 |
 
-`Interactable`'s `zoneN_joint` and `zoneN_offset_x/y/z` also set where a zone sits, per entity. The animations a
+`Interactable`'s `zoneN_joint` and `zoneN_offset_x/y/z` also set where a zone sits, per entity.
+
+The offset is in the joint's own frame. The FRV's side zones are offset (±0.1, -0.75, 0.8) from joints turned to face
+the vehicle, so each prompt sits 0.75 m inboard of its joint and 0.8 m up, in the door. Moving the joint alone keeps
+that inboard step. On a narrow vehicle, set the offset to (0, 0, z) and put the joint where the prompt should be. The animations a
 seated player plays stay the base's, so a seat moved far from where it was may look off.
 
 ## Physics of its own

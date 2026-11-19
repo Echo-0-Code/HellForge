@@ -40,6 +40,9 @@ public sealed record CopyResource(string Where, ulong Type, ulong From, string N
     // positions in the unit's space, by name ("#" and the hash for a joint the game names only by hash).
     public PhysicsSpec? Physics { get; init; }
     public IReadOnlyDictionary<string, double[]>? Joints { get; init; }
+    // Joints given a new parent ("joints": {"name": {"at": [x, y, z], "parent": "boss"}}): a joint the game animates
+    // keeps its old parent's pose, so a part that must follow the body hangs from a joint the clips leave alone.
+    public IReadOnlyDictionary<string, string>? JointParents { get; init; }
 }
 // A unit copy's own geometry: an OBJ in the mod folder (UnitMesh), scaled, Y-up or the game's Z-up; with UnitSpace its
 // coordinates are the unit's own (the frame its joints and attach points are in), otherwise its render mesh's.
@@ -369,7 +372,7 @@ public static partial class DataSpecs
         var physics = ReadPhysics(e, at, type, folder, inputs);
         var joints = ReadJoints(e, at, type);
         return new CopyResource(at, type, Id(Property(e, "copy", at), at), Name(e, at), expect, replace, curves, colours, lut, mesh, textures, shaders)
-            { Steam = steam, Build = build, Physics = physics, Joints = joints };
+            { Steam = steam, Build = build, Physics = physics, Joints = joints?.Item1, JointParents = joints is { Item2.Count: > 0 } j ? j.Item2 : null };
     }
 
     // A shader in a host, which says what else the resource needs.
@@ -522,25 +525,48 @@ public static partial class DataSpecs
         return new(file, []);
     }
 
-    // "joints": {"attach_driver": [x, y, z], "#cf12eb4f": [x, y, z]}: rest positions in the unit's own space (metres).
-    static Dictionary<string, double[]>? ReadJoints(JsonElement e, string at, ulong type)
+    // "joints": {"attach_driver": [x, y, z], "#cf12eb4f": [x, y, z], "l_rear_rotation": {"at": [x, y, z], "parent": "boss"}}:
+    // rest positions in the unit's own space (metres), and for a joint given as an object, optionally a new parent.
+    static (Dictionary<string, double[]>, Dictionary<string, string>)? ReadJoints(JsonElement e, string at, ulong type)
     {
         if (!e.TryGetProperty("joints", out var spec)) return null;
         if (type != ResourceTypes.Unit) throw new InvalidDataException($"{at}: joints is for a unit copy.");
         var joints = new Dictionary<string, double[]>();
+        var parents = new Dictionary<string, string>();
         foreach (var joint in Object(spec, $"{at}.joints"))
         {
             var where = $"{at}.joints.{joint.Name}";
             if (joint.Name.Length is 0 or > 100) throw new InvalidDataException($"{where}: a joint's name, or # and its 8-digit hash.");
-            var v = joint.Value;
-            if (v.ValueKind != JsonValueKind.Array || v.GetArrayLength() != 3 || v.EnumerateArray().Any(x => x.ValueKind != JsonValueKind.Number))
-                throw new InvalidDataException($"{where}: a position [x, y, z] in metres.");
-            var xyz = v.EnumerateArray().Select(x => x.GetDouble()).ToArray();
-            if (xyz.Any(x => !double.IsFinite(x) || Math.Abs(x) > 100)) throw new InvalidDataException($"{where}: each coordinate is within 100 m of the unit's origin.");
+            var (xyz, parent) = ReadJoint(joint.Value, where);
             joints[joint.Name] = xyz;
+            if (parent != null) parents[joint.Name] = parent;
         }
         if (joints.Count == 0) throw new InvalidDataException($"{at}.joints names no joint.");
-        return joints;
+        return (joints, parents);
+    }
+
+    // One joint: [x, y, z], or {"at": [x, y, z], "parent": "<joint>"}.
+    static (double[], string?) ReadJoint(JsonElement v, string where)
+    {
+        if (v.ValueKind != JsonValueKind.Object) return (Position(v, where), null);
+        Fields(v, where, "at", "parent");
+        string? name = null;
+        if (v.TryGetProperty("parent", out var parent))
+        {
+            name = parent.ValueKind == JsonValueKind.String ? parent.GetString() : null;
+            if (name is not { Length: > 0 and <= 100 }) throw new InvalidDataException($"{where}.parent: a joint's name, or # and its 8-digit hash.");
+        }
+        if (!v.TryGetProperty("at", out var position)) throw new InvalidDataException($"{where}: at [x, y, z] is required.");
+        return (Position(position, where), name);
+    }
+
+    static double[] Position(JsonElement v, string where)
+    {
+        if (v.ValueKind != JsonValueKind.Array || v.GetArrayLength() != 3 || v.EnumerateArray().Any(x => x.ValueKind != JsonValueKind.Number))
+            throw new InvalidDataException($"{where}: a position [x, y, z] in metres.");
+        var xyz = v.EnumerateArray().Select(x => x.GetDouble()).ToArray();
+        if (xyz.Any(x => !double.IsFinite(x) || Math.Abs(x) > 100)) throw new InvalidDataException($"{where}: each coordinate is within 100 m of the unit's origin.");
+        return xyz;
     }
 
     // "source": "game" (the default), "steam", or {"build": "<depot>:<manifest>"} / {"build": "yyyy-MM-dd"} (the build of

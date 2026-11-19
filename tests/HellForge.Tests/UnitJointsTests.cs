@@ -50,6 +50,17 @@ static class UnitJointsTests
             reject(() => UnitJoints.Move(m, new Dictionary<string, double[]> { ["wheel"] = [0, 0, 0] }));
             reject(() => UnitJoints.Move(m, new Dictionary<string, double[]> { ["root"] = [0, 0, 1] }));
             reject(() => UnitJoints.Move(new byte[0x40], new Dictionary<string, double[]> { ["seat"] = [0, 0, 1] }));
+
+            // The lamp (3) hung from the arm (1, turned 90 degrees): it keeps its world rotation, so its local rotation is
+            // the arm's undone, and at (0, 2, 0) its local translation is (2, 2, 0): (2, 2, 0) turned is (-2, 2, 0), plus the arm's (2, 0, 0).
+            check(UnitJoints.Move(m, new Dictionary<string, double[]> { ["#0badf00d"] = [0, 2, 0] }, new Dictionary<string, string> { ["#0badf00d"] = "arm" }) == 1,
+                "Only the lamp should move.");
+            float R(int i, int k) => BinaryPrimitives.ReadSingleLittleEndian(m.AsSpan(local + 64 * i + 4 * k));
+            check(BinaryPrimitives.ReadUInt32LittleEndian(m.AsSpan(parents + 4 * 3)) == (1u << 16 | 1), "The lamp's parent is not the arm.");
+            check(Near(L(3, 0), 2) && Near(L(3, 1), 2) && Near(L(3, 2), 0) && Near(W(3, 1), 2) && Near(W(3, 2), 0),
+                $"The hung lamp's local translation is ({L(3, 0)}, {L(3, 1)}, {L(3, 2)}).");
+            check(Near(R(3, 0), 0) && Near(R(3, 1), -1) && Near(R(3, 3), 1) && Near(R(3, 4), 0) && Near(R(3, 8), 1), "The hung lamp's local rotation does not undo the arm's.");
+            reject(() => UnitJoints.Move(m, new Dictionary<string, double[]> { ["arm"] = [0, 0, 0] }, new Dictionary<string, string> { ["arm"] = "seat" })); // a parent after it
         });
     }
 }

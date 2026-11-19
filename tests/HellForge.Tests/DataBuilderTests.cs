@@ -412,6 +412,11 @@ static class DataBuilderTests
             reject(() => Spec("""{"type":"unit","copy":"0x3333","name":"test/mod/port","physics":{"file":"physics/own.physics","bytes":[]}}"""));
             reject(() => Spec("""{"type":"material","copy":"0x7777","name":"test/mod/m","physics":{"file":"physics/own.physics"}}"""));
             reject(() => Spec("""{"type":"unit","copy":"0x3333","name":"test/mod/port","joints":{"seat":[0,0]}}"""));
+            var hung = Spec("""{"type":"unit","copy":"0x3333","name":"test/mod/port","joints":{"seat":[0,0,1],"wheel":{"at":[1,0,0],"parent":"boss"}}}""").Patches[0].Resources.OfType<CopyResource>().Single();
+            check(hung.Joints!.Count == 2 && hung.JointParents!["wheel"] == "boss" && hung.Joints["wheel"][0] == 1, "A joint given as an object lost its position or its parent.");
+            reject(() => Spec("""{"type":"unit","copy":"0x3333","name":"test/mod/port","joints":{"wheel":{"parent":"boss"}}}""")); // no position
+            reject(() => Spec("""{"type":"unit","copy":"0x3333","name":"test/mod/port","joints":{"wheel":{"at":[1,0,0],"parent":3}}}"""));
+            reject(() => Spec("""{"type":"unit","copy":"0x3333","name":"test/mod/port","joints":{"wheel":{"at":[1,0,0],"turn":1}}}"""));
             reject(() => ModDataBuilder.Build(Spec("""{"type":"unit","copy":"0x3333","name":"test/mod/port","source":"steam","joints":{"seat":[0,0,1]}}"""), mod, gameReader, output + "j", steamReader)); // no scene graph
             var material = built[new(ResourceTypes.Material, 0x7777)].Main;
             check(BinaryPrimitives.ReadInt32LittleEndian(material.AsSpan(0x40)) == 1 && Value(material, 0x50) == 42 &&
