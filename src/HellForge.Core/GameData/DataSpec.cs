@@ -566,26 +566,29 @@ public static partial class DataSpecs
     static EditResource ReadEdit(JsonElement e, string at, string? folder, ISet<string> inputs)
     {
         Fields(e, at, "type", "edit", "gpu", "stages", "bytes", "layers");
-        if (e.TryGetProperty("layers", out var layerSpec))
-        {
-            if (e.TryGetProperty("stages", out _) || e.TryGetProperty("bytes", out _) || e.TryGetProperty("gpu", out _))
-                throw new InvalidDataException($"{at}: layers is an edit of its own, without stages, bytes or gpu.");
-            if (Type(e, at) != ResourceTypes.Texture) throw new InvalidDataException($"{at}: layers is for a texture edit.");
-            var pngs = (layerSpec.ValueKind == JsonValueKind.Array ? layerSpec.EnumerateArray().ToList() : [])
-                .Select(p => p.ValueKind == JsonValueKind.String ? p.GetString()!.Replace('\\', '/') : "").ToList();
-            if (pngs.Count == 0 || pngs.Any(p => !InModFolder(p) || !p.EndsWith(".png", StringComparison.OrdinalIgnoreCase)))
-                throw new InvalidDataException($"{at}: layers is a list of .png files in the mod folder, one per added layer.");
-            foreach (var png in pngs)
-            {
-                if (folder != null && !File.Exists(Path.Combine(folder, png))) throw new InvalidDataException($"{at}: {png} is missing.");
-                inputs.Add(png);
-            }
-            return new EditResource(at, ResourceTypes.Texture, Id(Property(e, "edit", at), at), [], [], null, pngs);
-        }
+        if (e.TryGetProperty("layers", out var layerSpec)) return ReadLayers(e, layerSpec, at, folder, inputs);
         var stages = e.TryGetProperty("stages", out _) ? ReadStages(e, at) : [];
         var bytes = e.TryGetProperty("bytes", out _) ? ReadBytes(e, at) : [];
         if (stages.Count == 0 && bytes.Count == 0) throw new InvalidDataException($"{at}: an edit needs stages or bytes.");
         return new EditResource(at, Type(e, at), Id(Property(e, "edit", at), at), stages, bytes, e.TryGetProperty("gpu", out var gpu) ? ReadGpuPin(gpu, $"{at}.gpu") : null);
+    }
+
+    // "layers": PNGs in the mod folder added after a game array texture's own layers (TextureImage.AppendLayers).
+    static EditResource ReadLayers(JsonElement e, JsonElement layerSpec, string at, string? folder, ISet<string> inputs)
+    {
+        if (e.TryGetProperty("stages", out _) || e.TryGetProperty("bytes", out _) || e.TryGetProperty("gpu", out _))
+            throw new InvalidDataException($"{at}: layers is an edit of its own, without stages, bytes or gpu.");
+        if (Type(e, at) != ResourceTypes.Texture) throw new InvalidDataException($"{at}: layers is for a texture edit.");
+        var pngs = (layerSpec.ValueKind == JsonValueKind.Array ? layerSpec.EnumerateArray().ToList() : [])
+            .Select(p => p.ValueKind == JsonValueKind.String ? p.GetString()!.Replace('\\', '/') : "").ToList();
+        if (pngs.Count == 0 || pngs.Any(p => !InModFolder(p) || !p.EndsWith(".png", StringComparison.OrdinalIgnoreCase)))
+            throw new InvalidDataException($"{at}: layers is a list of .png files in the mod folder, one per added layer.");
+        foreach (var png in pngs)
+        {
+            if (folder != null && !File.Exists(Path.Combine(folder, png))) throw new InvalidDataException($"{at}: {png} is missing.");
+            inputs.Add(png);
+        }
+        return new EditResource(at, ResourceTypes.Texture, Id(Property(e, "edit", at), at), [], [], null, pngs);
     }
 
     // "gpu": { "size", "sha256" }: the whole GPU part as the spec was written for. Offsets that are right on one build can
