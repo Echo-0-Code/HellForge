@@ -29,6 +29,9 @@ On `dev`, since 0.4.0-beta.
 - **A moved joint can change parent.** A joint given as `{"at": [x, y, z], "parent": "boss"}` keeps its world
   rotation under its new parent. The game animates a vehicle's bones from its base's poses, so a wheel moved under its
   suspension arms is drawn where the base's was. Hung from the body, it stays where it was put.
+- **BC7 textures.** A data spec texture can be `"format": "bc7"`, the game's own format for a weapon's `base_data`.
+  It keeps a normal map about twice as close to the PNG as `bc3`, at a quarter of `rgba8`'s size
+  (#12, [textures](docs/modding/textures.md#formats)).
 - **Buttons over game menus.** A screen that is not modal can take the mouse's clicks inside its own boxes with the
   new `HfDraw.take_clicks`, so a mod's button can sit on the armory. The game gets neither the press nor its release;
   everything else still reaches it (#2, [overlay](docs/modding/overlay.md#click-boxes)).

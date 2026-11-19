@@ -11,7 +11,7 @@ static class SandboxPipeRelayTests
     {
         test("The sandbox pipe relay carries bytes both ways for the backend and live pipes", () => Run(async () =>
         {
-            var runId = "relay" + Guid.NewGuid().ToString("N")[..12];
+            var runId = NewRunId();
             var names = SandboxPipeRelay.Names(runId);
             await using var backend = new EchoPipe("real-" + names.Backend);
             await using var live = new EchoPipe("real-" + names.Live);
@@ -31,7 +31,7 @@ static class SandboxPipeRelayTests
 
         test("The sandbox pipe relay refuses a domain with the wrong run token", () => Run(async () =>
         {
-            var runId = "relay" + Guid.NewGuid().ToString("N")[..12];
+            var runId = NewRunId();
             var names = SandboxPipeRelay.Names(runId);
             await using var backend = new EchoPipe("real-" + names.Backend);
             backend.Start();
@@ -48,7 +48,7 @@ static class SandboxPipeRelayTests
 
         test("The sandbox pipe relay accepts many connections and a closed game's next connection", () => Run(async () =>
         {
-            var runId = "relay" + Guid.NewGuid().ToString("N")[..12];
+            var runId = NewRunId();
             var names = SandboxPipeRelay.Names(runId);
             await using var backend = new EchoPipe("real-" + names.Backend);
             backend.Start();
@@ -71,7 +71,7 @@ static class SandboxPipeRelayTests
 
         test("The sandbox pipe relay closes the game pipe when the trusted pipe side closes", () => Run(async () =>
         {
-            var runId = "relay" + Guid.NewGuid().ToString("N")[..12];
+            var runId = NewRunId();
             var names = SandboxPipeRelay.Names(runId);
             await using var backend = new EchoPipe("real-" + names.Backend);
             backend.Start();
@@ -111,6 +111,10 @@ static class SandboxPipeRelayTests
             check(refused, "A zero-length frame was accepted.");
         });
     }
+
+    // .NET puts a Unix pipe in TMPDIR, and its socket path must stay under 108 bytes; CI's TMPDIR in the workspace
+    // already takes 60, so the run id stays short.
+    static string NewRunId() => "r" + Guid.NewGuid().ToString("N")[..8];
 
     static void Run(Func<Task> action) => action().GetAwaiter().GetResult();
 
