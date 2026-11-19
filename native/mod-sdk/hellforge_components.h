@@ -4932,6 +4932,46 @@ HF_ASSERT_OFFSET(HfStatusEffectReceiver, duration_7_type, 46592);
 HF_ASSERT_OFFSET(HfStatusEffectReceiver, duration_7_multiplier, 46596);
 #define HF_TYPE_StatusEffectReceiver_duration_7_multiplier HF_TYPE_F32
 
+/* InteractableComponentData (component 244, 1104-byte records): how players use an entity: eight 0x88-byte interact zones (a vehicle's seats, a rack's pickup) */
+#define HfInteractable_INFO "InteractableComponentData", 25480438u
+typedef struct HfInteractable
+{
+    uint8_t _unknown_00[48];
+    uint32_t zone0_type;                         /* +0x30 interact zone 0: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
+    uint8_t _unknown_34[132];
+    uint32_t zone1_type;                         /* +0xB8 interact zone 1: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
+    uint8_t _unknown_BC[132];
+    uint32_t zone2_type;                         /* +0x140 interact zone 2: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
+    uint8_t _unknown_144[132];
+    uint32_t zone3_type;                         /* +0x1C8 interact zone 3: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
+    uint8_t _unknown_1CC[132];
+    uint32_t zone4_type;                         /* +0x250 interact zone 4: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
+    uint8_t _unknown_254[132];
+    uint32_t zone5_type;                         /* +0x2D8 interact zone 5: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
+    uint8_t _unknown_2DC[132];
+    uint32_t zone6_type;                         /* +0x360 interact zone 6: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
+    uint8_t _unknown_364[132];
+    uint32_t zone7_type;                         /* +0x3E8 interact zone 7: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
+    uint8_t _unknown_3EC[100];
+} HfInteractable;
+HF_ASSERT_SIZE(HfInteractable, 1104);
+HF_ASSERT_OFFSET(HfInteractable, zone0_type, 48);
+#define HF_TYPE_Interactable_zone0_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone1_type, 184);
+#define HF_TYPE_Interactable_zone1_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone2_type, 320);
+#define HF_TYPE_Interactable_zone2_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone3_type, 456);
+#define HF_TYPE_Interactable_zone3_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone4_type, 592);
+#define HF_TYPE_Interactable_zone4_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone5_type, 728);
+#define HF_TYPE_Interactable_zone5_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone6_type, 864);
+#define HF_TYPE_Interactable_zone6_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone7_type, 1000);
+#define HF_TYPE_Interactable_zone7_type HF_TYPE_U32
+
 #pragma pack(pop)
 
 #endif

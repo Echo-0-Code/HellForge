@@ -10069,6 +10069,74 @@
           "verified": false
         }
       }
+    },
+    "Interactable": {
+      "component": "InteractableComponentData",
+      "index": 244,
+      "stride": 1104,
+      "layout": "25480438",
+      "meaning": "how players use an entity: eight 0x88-byte interact zones (a vehicle's seats, a rack's pickup)",
+      "fields": {
+        "zone0_type": {
+          "offset": 48,
+          "type": "u32",
+          "meaning": "interact zone 0: what using it does (19 enters a seat, 9 a supply rack, 0 none)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo +0x28; FileDiver generated_entities (M-102 zones 0-4 are 19, M-103 zone 2 is 9)"
+        },
+        "zone1_type": {
+          "offset": 184,
+          "type": "u32",
+          "meaning": "interact zone 1: what using it does (19 enters a seat, 9 a supply rack, 0 none)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo +0x28; FileDiver generated_entities (M-102 zones 0-4 are 19, M-103 zone 2 is 9)"
+        },
+        "zone2_type": {
+          "offset": 320,
+          "type": "u32",
+          "meaning": "interact zone 2: what using it does (19 enters a seat, 9 a supply rack, 0 none)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo +0x28; FileDiver generated_entities (M-102 zones 0-4 are 19, M-103 zone 2 is 9)"
+        },
+        "zone3_type": {
+          "offset": 456,
+          "type": "u32",
+          "meaning": "interact zone 3: what using it does (19 enters a seat, 9 a supply rack, 0 none)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo +0x28; FileDiver generated_entities (M-102 zones 0-4 are 19, M-103 zone 2 is 9)"
+        },
+        "zone4_type": {
+          "offset": 592,
+          "type": "u32",
+          "meaning": "interact zone 4: what using it does (19 enters a seat, 9 a supply rack, 0 none)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo +0x28; FileDiver generated_entities (M-102 zones 0-4 are 19, M-103 zone 2 is 9)"
+        },
+        "zone5_type": {
+          "offset": 728,
+          "type": "u32",
+          "meaning": "interact zone 5: what using it does (19 enters a seat, 9 a supply rack, 0 none)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo +0x28; FileDiver generated_entities (M-102 zones 0-4 are 19, M-103 zone 2 is 9)"
+        },
+        "zone6_type": {
+          "offset": 864,
+          "type": "u32",
+          "meaning": "interact zone 6: what using it does (19 enters a seat, 9 a supply rack, 0 none)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo +0x28; FileDiver generated_entities (M-102 zones 0-4 are 19, M-103 zone 2 is 9)"
+        },
+        "zone7_type": {
+          "offset": 1000,
+          "type": "u32",
+          "meaning": "interact zone 7: what using it does (19 enters a seat, 9 a supply rack, 0 none)",
+          "verified": false,
+          "source": "game DL type library InteractZoneInfo +0x28; FileDiver generated_entities (M-102 zones 0-4 are 19, M-103 zone 2 is 9)"
+        }
+      },
+      "applies": "respawn",
+      "appliesVerified": false,
+      "appliesSource": "entities copy their type's records when they are made"
     }
   }
 }
