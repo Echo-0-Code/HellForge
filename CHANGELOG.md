@@ -12,6 +12,9 @@ On `dev`, since 0.4.0-beta.
 
 ### Added
 
+- **BC7 textures.** A data spec texture can be `"format": "bc7"`, the game's own format for a weapon's `base_data`.
+  It keeps a normal map about twice as close to the PNG as `bc3`, at a quarter of `rgba8`'s size
+  (#12, [textures](docs/modding/textures.md#formats)).
 - **Buttons over game menus.** A screen that is not modal can take the mouse's clicks inside its own boxes with the
   new `HfDraw.take_clicks`, so a mod's button can sit on the armory. The game gets neither the press nor its release;
   everything else still reaches it (#2, [overlay](docs/modding/overlay.md#click-boxes)).
