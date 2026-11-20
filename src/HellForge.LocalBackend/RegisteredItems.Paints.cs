@@ -9,7 +9,7 @@ namespace HellForge.LocalBackend;
 // in "paintItems". Mods' copies of them inherit that record. For each of these weapons this serves:
 //   /Progression/items                 the 12 game paints as its children, copies of the Liberator's;
 //   /Progression/ProgressionPackages   PaintPackage(weapon): the Liberator's package with every reward and unlock taken
-//                                      out, the paints as rewards of level 1;
+//                                      out, the Default paint a free unlockable of level 1 and the others its rewards;
 //   /Progression                       that package at level 1, so the screen offers its rewards;
 //   /Progression/inventory             the paints, held with the weapon.
 // The package earns nothing: no MasteryTrack names it, so missions give it no XP.
@@ -109,7 +109,15 @@ public sealed partial class RegisteredItems
                 level["unlockableItems"] = new JsonArray();
             }
             if (FirstLevel(package) is { } first)
-                foreach (var paint in GamePaints) AddReward(first, WeaponChild(paint, weapon));
+            {
+                // The armory shows CUSTOMIZE only for a package with an unlockable item on some level (game.dll 0x191D040
+                // reads each level's unlockable count), so the Default paint is a free one there, the rest rewards.
+                foreach (var paint in GamePaints.Skip(1)) AddReward(first, WeaponChild(paint, weapon));
+                first["unlockableItems"] = new JsonArray(new JsonObject
+                {
+                    ["mixId"] = WeaponChild(GamePaints[0], weapon), ["amount"] = 1, ["sortOrder"] = 0, ["cost"] = new JsonArray(),
+                });
+            }
             packages.Add((JsonNode?)package);
             mastery[weapon] = package;
         }

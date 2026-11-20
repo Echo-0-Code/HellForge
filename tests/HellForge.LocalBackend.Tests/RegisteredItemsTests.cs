@@ -235,10 +235,12 @@ static class RegisteredItemsTests
                 $"Weapon {weapon} lacks the game paints as children in its run.");
             var package = packages.SingleOrDefault(p => (uint?)p["id32"] == RegisteredItems.PaintPackage(weapon));
             var rewards = package?["levels"]!.AsArray().SelectMany(l => l!["rewards"]!.AsArray()).Select(r => (uint)r!["id32"]!).ToList() ?? [];
-            var unlocks = package?["levels"]!.AsArray().Sum(l => l!["unlockableItems"]!.AsArray().Count);
-            var expected = weapon == Copy ? paints.Append(RegisteredItems.WeaponChild(Tiger, Copy)) : paints;
-            check(package != null && (uint)package["requiredItems"]![0]! == weapon && unlocks == 0 && rewards.ToHashSet().SetEquals(expected),
-                $"Weapon {weapon}'s paint package does not reward its paints (and its mod pattern) alone.");
+            var unlocks = package?["levels"]!.AsArray().SelectMany(l => l!["unlockableItems"]!.AsArray()).ToList() ?? [];
+            var expected = (weapon == Copy ? paints.Append(RegisteredItems.WeaponChild(Tiger, Copy)) : paints).Skip(1);
+            check(package != null && (uint)package["requiredItems"]![0]! == weapon && rewards.ToHashSet().SetEquals(expected),
+                $"Weapon {weapon}'s paint package does not reward its paints but Default (and its mod pattern) alone.");
+            check(unlocks.Count == 1 && (uint)unlocks[0]!["mixId"]! == paints[0] && unlocks[0]!["cost"]!.AsArray().Count == 0,
+                $"Weapon {weapon}'s paint package lacks the Default paint as its one free unlockable (the armory's CUSTOMIZE needs one).");
         }
         check(RegisteredItems.PaintPackage(Copy) == RegisteredItems.Rehome(RegisteredItems.PaintPackage(Stim), Stim, Copy),
             "A copy's paint package is not the id the loader renames its base's to (OwnCustomization).");
