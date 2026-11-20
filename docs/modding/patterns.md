@@ -142,7 +142,6 @@ the pattern colour. A shape of your own is a greyscale PNG painted on the model'
     "format": "bc4", "category": "0x8C3BB092" } ] }] }
 ```
 
-
 ### Camouflage shapes on weapons
 
 A weapon paint's camouflage is drawn from one layer of a shared array texture, `customization_camo_tiler_array`
