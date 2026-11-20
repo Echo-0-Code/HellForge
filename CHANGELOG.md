@@ -566,6 +566,9 @@ On `dev`, since 0.4.0-beta.
 
 ### For mod makers
 
+- **`content()` lists weapon patterns.** Mods' `add_pattern` paints come last as `HF_KIND_WEAPON_PATTERN`, with their
+  paint item, base, name and swatch, so a mod can offer them in a picker of its own
+  ([finding content](docs/modding/content.md)).
 - **SDK 21: effects on entities, enemies near a point and the armory's weapon.** `play_effect` hangs particles on
   an entity's node, and with `HF_EFFECT_SHARED` every machine of the lobby plays them too, as a Coolant Pack's steam.
   `find_enemies` lists the living enemies within a radius, nearest first, with health and faction. `armory_weapon`
