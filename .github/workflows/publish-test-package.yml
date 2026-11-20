@@ -1,0 +1,29 @@
+# Publishes an existing test-package artifact as a pre-release, so it can be fetched where only GitHub release
+# downloads are reachable. Pushed by the "Combine weapons into one mod" thread on 20 Nov, with Jan's approval.
+name: Publish test package
+
+on:
+  push:
+    branches: [ci/publish-test-package]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Download the artifact and publish it
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: '44639504632'
+          TAG: test-889f2c3
+        run: |
+          gh run download "$RUN_ID" -R "$GITHUB_REPOSITORY" -n test-package -D pkg
+          find pkg -type f -exec ls -la {} \;
+          cp "$(find pkg -name HellForge-Setup.exe | head -1)" HellForge-Setup.exe
+          cp "$(find pkg -name hellforge_modloader.dll | head -1)" hellforge_modloader.dll
+          sha256sum HellForge-Setup.exe hellforge_modloader.dll | tee SHA256SUMS
+          gh release create "$TAG" -R "$GITHUB_REPOSITORY" --prerelease --target 889f2c3c6498b9c0ba3e45daf1348162b8de6c4c \
+            --title "Test build 889f2c3 (run $RUN_ID)" --notes "test-package artifact of run $RUN_ID, republished for download." \
+            HellForge-Setup.exe hellforge_modloader.dll SHA256SUMS
