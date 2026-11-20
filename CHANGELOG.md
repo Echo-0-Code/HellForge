@@ -566,6 +566,8 @@ On `dev`, since 0.4.0-beta.
 
 ### For mod makers
 
+- **SDK 22: texts of a mod's own.** `add_text` gives a string a text id the game's text lookup answers, for the game's
+  widgets that take an id, such as a tab bar's labels ([texts](docs/modding/ui.md#texts-for-the-games-own-widgets)).
 - **`content()` lists weapon patterns.** Mods' `add_pattern` paints come last as `HF_KIND_WEAPON_PATTERN`, with their
   paint item, base, name and swatch, so a mod can offer them in a picker of its own
   ([finding content](docs/modding/content.md)).
