@@ -456,6 +456,26 @@
    "stride": 76,
    "type": 515536275
   },
+  "TwoPointChainAttachTargetComponentData": {
+   "offset": 27296448,
+   "header": "50fa02744c444c440100000050fa0274780000000100000000000000",
+   "index": 251,
+   "indices": 6,
+   "records": 3,
+   "recordOffset": 96,
+   "stride": 8,
+   "type": 1946352208
+  },
+  "TwoPointChainComponentData": {
+   "offset": 27296600,
+   "header": "741185e24c444c4401000000741185e2f80100000100000000000000",
+   "index": 252,
+   "indices": 6,
+   "records": 3,
+   "recordOffset": 96,
+   "stride": 136,
+   "type": 3800371572
+  },
   "UnitComponentData": {
    "offset": 912200,
    "header": "4d5737444c444c44010000004d573744405604000100000000000000",
