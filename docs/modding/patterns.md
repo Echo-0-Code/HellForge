@@ -142,7 +142,6 @@ the pattern colour. A shape of your own is a greyscale PNG painted on the model'
     "format": "bc4", "category": "0x8C3BB092" } ] }] }
 ```
 
-
 ### Camouflage shapes on weapons
 
 A weapon paint's camouflage is drawn from one layer of a shared array texture, `customization_camo_tiler_array`
@@ -164,7 +163,7 @@ cell sets alpha too, so a copy of a camouflaged paint's LUTs can take another la
 
 A shape of your own is a layer added after the game's five with a texture `edit` ([data specs](data.md#edit)), so
 layer 5 is your first. Each channel of a layer is a soft mask. The high contrast makes a sharp edge where it crosses
-about 0.5, so paint the shapes with blurred edges (a distance field is best), and make them tile seamlessly.
+about 0.5, so paint the shapes with blurred edges (a distance field is best), and make opposite edges match so the tiles show no seam.
 The array is in six of the game's archives; list them all:
 
 ```json
