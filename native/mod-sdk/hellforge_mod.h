@@ -779,7 +779,7 @@ typedef struct HfContent
     uint32_t arc;
     /* SDK 20, a weapon: the damage its spray deals of a mod's (0: its base's) */
     uint32_t spray_damage;
-    /* HellForge 2026-11-20, a weapon pattern: its swatch (HfPattern.colours and colour_count), or NULL */
+    /* HellForge 2026-11-20, a weapon pattern: its swatch (HfPattern.colours, linear RGB), or NULL */
     const float (*colours)[3]; uint32_t colour_count;
 } HfContent;
 #define HF_KIND_WEAPON_PATTERN 64u /* content() only, outside the catalogue's kinds (hellforge_content.h) */

@@ -737,7 +737,7 @@ and check the change.
   config file, another mod's content); code that knows the content uses the constants.
 - Everything mods added: `HfContent out = {sizeof out}; hf->content(mod, index, &out)` (SDK 7; it returns 0 without
   `size`), complete from `HF_EVENT_GAME_LOADED`. Weapon patterns of `add_pattern` come last, as
-  `HF_KIND_WEAPON_PATTERN`: `id` is the paint item, `base` the paint it copies, `title` its name, `colours` its swatch.
+  `HF_KIND_WEAPON_PATTERN`: `id` is the paint item, `base` the paint it copies, `title` its name, `colours` its swatch (linear RGB).
 - `hf->resource_hash("yourname/your_mod/bolt")` is the 64-bit id the game's data stores for a resource name.
 
 ## Where to go next
