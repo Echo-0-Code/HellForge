@@ -192,7 +192,10 @@ void DrawScreens(float width, float height, float dt)
     LONG count = g_screenCount;
     g_pointerAsked = false;
     BeginClickBoxes(width, height);
-    for (LONG i = 0; i < count; i++) DrawScreen(g_screens[i], (int)i + 1, capturing, &draw, dt);
+    /* the screen with the input last, so another mod's later button never draws over it */
+    for (LONG i = 0; i < count; i++)
+        if ((int)i + 1 != capturing) DrawScreen(g_screens[i], (int)i + 1, capturing, &draw, dt);
+    if (capturing >= 1 && capturing <= count) DrawScreen(g_screens[capturing - 1], capturing, capturing, &draw, dt);
     EndClickBoxes();
     g_backdropTaken = NULL;
     FollowPointer(g_pointerAsked);

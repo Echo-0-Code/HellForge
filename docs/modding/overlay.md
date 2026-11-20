@@ -61,7 +61,8 @@ window, 2520 on 21:9. (0, 0) is the top left. `pixels` is pixels per unit, the w
 
 ## HfDraw
 
-`HfDraw` is valid only inside `draw`. Everything is drawn in call order, inside the current clip. Shapes are
+`HfDraw` is valid only inside `draw`. Everything is drawn in call order, inside the current clip. Screens draw in the
+order they were added, but the modal screen with the input draws last, over every other mod's screens. Shapes are
 anti-aliased.
 
 | Function | What it draws |
