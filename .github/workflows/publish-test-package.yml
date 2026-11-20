@@ -22,8 +22,7 @@ jobs:
           gh run download "$RUN_ID" -R "$GITHUB_REPOSITORY" -n test-package -D pkg
           find pkg -type f -exec ls -la {} \;
           cp "$(find pkg -name HellForge-Setup.exe | head -1)" HellForge-Setup.exe
-          cp "$(find pkg -name hellforge_modloader.dll | head -1)" hellforge_modloader.dll
-          sha256sum HellForge-Setup.exe hellforge_modloader.dll | tee SHA256SUMS
+          sha256sum HellForge-Setup.exe | tee SHA256SUMS
           gh release create "$TAG" -R "$GITHUB_REPOSITORY" --prerelease --target 889f2c3c6498b9c0ba3e45daf1348162b8de6c4c \
             --title "Test build 889f2c3 (run $RUN_ID)" --notes "test-package artifact of run $RUN_ID, republished for download." \
-            HellForge-Setup.exe hellforge_modloader.dll SHA256SUMS
+            HellForge-Setup.exe SHA256SUMS
