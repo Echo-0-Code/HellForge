@@ -13,7 +13,9 @@ On `dev`, since 0.4.0-beta.
 ### Added
 
 - **Paints on secondaries.** Every secondary, the game's and mods' copies of them, has a customize screen with the
-  game's 12 paints, and takes mods' weapon patterns ([patterns](docs/modding/patterns.md#where-it-shows)).
+  game's 12 paints, and takes mods' weapon patterns ([patterns](docs/modding/patterns.md#where-it-shows)). Its
+  package offers the Default paint as a free unlockable, because the Armory shows CUSTOMIZE only for a package with
+  one. The Armory still offers the button on primaries alone; a mod can lift that check.
 - **Camouflage shapes of your own.** A data spec can add layers to one of the game's array textures after its own
   (a texture `edit` with `layers`). A LUT cell takes `[r, g, b, a]`, so a weapon paint can pick any camouflage layer,
   the game's or a mod's ([patterns](docs/modding/patterns.md#camouflage-shapes-on-weapons)).
