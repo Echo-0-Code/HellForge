@@ -12,12 +12,36 @@ On `dev`, since 0.4.0-beta.
 
 ### Added
 
+- **Paints on secondaries.** Every secondary, the game's and mods' copies of them, has a customize screen with the
+  game's 12 paints, and takes mods' weapon patterns ([patterns](docs/modding/patterns.md#where-it-shows)).
+- **Camouflage shapes of your own.** A data spec can add layers to one of the game's array textures after its own
+  (a texture `edit` with `layers`). A LUT cell takes `[r, g, b, a]`, so a weapon paint can pick any camouflage layer,
+  the game's or a mod's ([patterns](docs/modding/patterns.md#camouflage-shapes-on-weapons)).
+- **Vehicles with a model of their own.** A unit copy's `mesh` takes `"parts": true`: each object of the OBJ rides the
+  unit joint it is named after, so a vehicle's wheels steer and turn under a body of the mod's own. The copy keeps its
+  base's joints, so seats, damage zones and the gun mount still fit. The `vehicle-model` example is an M-102 under a
+  body of boxes ([new vehicles](docs/modding/vehicles.md)).
+- **Fewer seats or no gun on a vehicle copy.** `Interactable` is mapped: set a seat's interact zone type and radius to 0
+  to close it (the FRV's roof seat is zone 2), and `Mount.slot0_entity` to 0 to take its gun off
+  ([new vehicles](docs/modding/vehicles.md)).
+- **Vehicles with physics of their own, and seats that move.** A unit copy's `physics` takes a physics file from the
+  mod folder or byte edits on its base's, and its `joints` moves seats, interact points and other joints, with what
+  rides them. `Vehicle` maps which joints each physics wheel turns, and `Interactable` each zone's joint and offset
+  ([new vehicles](docs/modding/vehicles.md#physics-of-its-own)).
+- **A moved joint can change parent.** A joint given as `{"at": [x, y, z], "parent": "boss"}` keeps its world
+  rotation under its new parent. The game animates a vehicle's bones from its base's poses, so a wheel moved under its
+  suspension arms is drawn where the base's was. Hung from the body, it stays where it was put.
+- **BC7 textures.** A data spec texture can be `"format": "bc7"`, the game's own format for a weapon's `base_data`.
+  It keeps a normal map about twice as close to the PNG as `bc3`, at a quarter of `rgba8`'s size
+  (#12, [textures](docs/modding/textures.md#formats)).
 - **Buttons over game menus.** A screen that is not modal can take the mouse's clicks inside its own boxes with the
   new `HfDraw.take_clicks`, so a mod's button can sit on the armory. The game gets neither the press nor its release;
   everything else still reaches it (#2, [overlay](docs/modding/overlay.md#click-boxes)).
 - **Skinned models bend.** A mod model's skinned glTF mesh keeps up to four weighted joints per vertex, in the
   game's own skinned layout, so belts, straps and cables bend between joints as clips move them
   (#3, [models](docs/modding/models.md#meshes-lods-and-shadows)). Models without weights build as before.
+- **48 mod paints a weapon.** A weapon's customize screen lists up to 127 cards instead of 64, so mods' paints go up to
+  48 on one weapon instead of 16. Only on game build 25480438; otherwise the limit stays 16.
 - **Missile spread in the editor.** Every seeking missile's page has a Spread group: whether its missiles veer off
   their launch line, how far and which way, the curve they fly after, and how fast they swing back onto the target.
   The W.A.S.P., the Missile Pistol and the Warrant have it on; the Spear, the Commando and the others can turn it on.
@@ -248,6 +272,8 @@ On `dev`, since 0.4.0-beta.
 
 ### Changed
 
+- **Up to 256 packages.** HellForge holds up to 256 packages a session instead of 64, so mods with many packages are
+  no longer refused while the game has room. Friends' packages leave 64 of them for your own (#13).
 - **Hellpod / Call-in opens every stratagem's page in the editor.** Support weapons had it last, under all of the
   weapon's own sections; now it comes first, as on every other stratagem.
 - **Big enemy counts run faster.** With 950 to 1,100 enemies alive, a mission ran at 34.5 fps instead of 27.0, and the
@@ -373,6 +399,12 @@ On `dev`, since 0.4.0-beta.
 
 ### Fixed
 
+- **Every mapped function resolves by name.** The loader kept only the first 512 of the 559 functions mapped for
+  game build 25480438, so `function` and `hook_function` answered "not a mapped function" for the rest, `UnitWorldPose`,
+  `UnitNode` and `LightSetEnabled` among them. It now has room for 1,024, and a mappings update that outgrows that fails
+  the build (#10).
+- **40,960 catalogue items again.** The larger entity table made the game state's arrays stay in place, so the game
+  kept 4,096 catalogue items and the backend refused mod paints past them. Both now grow the same block together.
 - **Windows: HellForge started from Steam as a non-Steam game finds Steam.** Steam gives such a shortcut an app id of
   its own, and the Steam check and the game inherited it, so they asked Steam about the shortcut instead of
   HELLDIVERS 2. The launcher and the CLI now drop the shortcut's ids as they start (#434).

@@ -1428,7 +1428,7 @@ typedef struct HfApi
     /* Loads a package (by its resource name hash, as mappings/references.json lists them, or since SDK 17 a data spec's
      * own "package" of any mod of the session) and holds it for the session, through the game's own package system on
      * the game thread: HF_PACKAGE_RESIDENT once the engine has all of it, HF_PACKAGE_LOADING until then (call it again
-     * to see), 0 refused or failed (neither kind, HellForge's 64 held already, or not loaded within 90 seconds; the
+     * to see), 0 refused or failed (neither kind, HellForge's 256 held already, or not loaded within 90 seconds; the
      * mod's log says why). Loading is per client: other players
      * load their own. A reference set_live or a stats file writes (a donor projectile, an explosion) loads its packages
      * itself. */
@@ -1690,9 +1690,10 @@ typedef struct HfApi
 
     /* ---- SDK 18: patterns (check hf->size before calling) ---------------------------------------------------------- */
     /* Adds a pattern (see HfPattern). Call it from hellforge_mod_init. Returns its id, or 0 (the mod's log says why).
-     * Weapon patterns count among add_attachment's 1,024 across all mods, unit patterns 128; a weapon takes 16 mods'
-     * patterns, and a vehicle, hellpod or Pelican collection 24 skins in all (16 to 19 are the game's). Its textures must
-     * be loaded: put them in a session package of the mod's data. */
+     * Weapon patterns count among add_attachment's 1,024 across all mods, unit patterns 128; a weapon takes 48 mods'
+     * patterns (16 when the game's customize list stays at 64 entries), and a vehicle, hellpod or Pelican collection 24
+     * skins in all (16 to 19 are the game's). Its textures must be loaded: put them in a session package of the mod's
+     * data. */
     uint32_t (*add_pattern)(HfMod* mod, const HfPattern* pattern);
 
     /* ---- SDK 19: screens in the game's own UI (hellforge_ui.h, docs/modding/ui.md; check hf->size) ---------------- */

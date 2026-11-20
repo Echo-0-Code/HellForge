@@ -149,6 +149,27 @@ static class DataBuilderTests
             check(Lz4.DecompressBlock([0x41, (byte)'a', (byte)'b', (byte)'c', (byte)'d', 4, 0, 0x10, (byte)'x'], 10).SequenceEqual("abcdabcdax"u8.ToArray()), "LZ4 matches decode wrongly.");
         });
 
+        test("A game array texture takes layers of a mod's own after its own (the weapons' camouflage tiler)", () =>
+        {
+            byte[] Fill(byte v) => Enumerable.Repeat(v, 16 * 16 * 4).ToArray();
+            var game = TextureImage.Build([Png(Fill(10), 16), Png(Fill(20), 16)], "rgba8");
+            var whole = TextureImage.Build([Png(Fill(10), 16), Png(Fill(20), 16), Png(Fill(30), 16)], "rgba8");
+            var added = TextureImage.AppendLayers(game, [Png(Fill(30), 16)]);
+            check(added.Gpu.SequenceEqual(whole.Gpu) && added.Main.SequenceEqual(whole.Main), "The added layer is not after the game's two, in the game's header with 3 layers.");
+            check(BitConverter.ToInt32(added.Main, 0xC4 + 136) == 3 && BitConverter.ToInt32(game.Main, 0xC4 + 136) == 2, "The layer count is wrong.");
+            reject(() => TextureImage.AppendLayers(game, [Png(new byte[8 * 8 * 4], 8)]));
+            reject(() => TextureImage.AppendLayers(game with { Stream = [1] }, [Png(Fill(30), 16)]));
+            reject(() => TextureImage.AppendLayers(game with { Gpu = game.Gpu[..^4] }, [Png(Fill(30), 16)]));
+            reject(() => TextureImage.AppendLayers(TextureImage.Build([Png(Fill(10), 16)], "bc4") with { Main = TextureImage.Main(16, 16, 5, 98, 0, 1) }, [Png(Fill(30), 16)]));
+            // A LUT cell of four values sets alpha too (column 21's camouflage layer); three keep the game's alpha.
+            var lut = ResourceEdits.RecolourLut(IconImage.TextureMain(23, 8, 5, 10), Lut(), new(null,
+                new Dictionary<int, double[]> { [21] = [216.625, -1, 1.2, 5] }, new Dictionary<int, IReadOnlyDictionary<int, double[]>> { [1] = new Dictionary<int, double[]> { [0] = [0.5, 0.25, 0.125] } }));
+            var gpu = ResourceEdits.RecolourLut(IconImage.TextureMain(23, 8, 5, 10), Lut(), new(null, new Dictionary<int, double[]>(), new Dictionary<int, IReadOnlyDictionary<int, double[]>>()));
+            check((float)BinaryPrimitives.ReadHalfLittleEndian(lut.AsSpan((2 * 23 + 21) * 8 + 6)) == 5f && (float)BinaryPrimitives.ReadHalfLittleEndian(lut.AsSpan((2 * 23 + 21) * 8 + 2)) == -1f,
+                "Column 21's alpha and a negative value were not written.");
+            check(lut.AsSpan(23 * 8 + 6, 2).SequenceEqual(gpu.AsSpan(23 * 8 + 6, 2)), "A three-value cell changed alpha.");
+        });
+
         test("Data specs are checked: fields, names, archives, colours and input files", () =>
         {
             var folder = Path.Combine(root, "data-spec-checks");
@@ -171,6 +192,16 @@ static class DataBuilderTests
             Refused("""{"archives":["1111111111111111"],"resources":[{"type":"particles","copy":"0x1","name":"test/mod/fx","curves":{"preset":"pink"}}]}""", "warm-to-blue");
             Refused("""{"archives":["1111111111111111"],"resources":[{"type":"material","copy":"0x1","name":"test/mod/m","colours":{"0x1":[1,2]}}]}""", "a colour is");
             Refused("""{"archives":["1111111111111111"],"resources":[{"type":"unit","copy":"0xZZ","name":"test/mod/unit"}]}""", "0x<up to 16 hex digits>");
+            Refused("""{"archives":["1111111111111111"],"resources":[{"type":"material","edit":"0x1","layers":["icon.png"]}]}""", "layers is for a texture edit");
+            Refused("""{"archives":["1111111111111111"],"resources":[{"type":"texture","edit":"0x1","layers":[]}]}""", "a list of .png files");
+            Refused("""{"archives":["1111111111111111"],"resources":[{"type":"texture","edit":"0x1","layers":["icon.png"],"bytes":[]}]}""", "an edit of its own");
+            Refused("""{"archives":["1111111111111111"],"resources":[{"type":"texture","copy":"0x1","name":"test/mod/lut","lut":{"columns":{"21":[1,2,3,4,5]}}}]}""", "a cell is");
+            File.WriteAllText(Path.Combine(folder, DataSpecs.FileName), """{"format":1,"patches":[{"archives":["1111111111111111"],"resources":[{"type":"texture","edit":"0xF8B2508E99FB9F28","layers":["icon.png"]},""" +
+                """{"type":"texture","copy":"0x1","name":"test/mod/lut","lut":{"columns":{"21":[216.625,-1,1.2,5]}}}]}]}""");
+            var layered = DataSpecs.Load(folder)!;
+            check(layered.Patches[0].Resources[0] is EditResource { Id: 0xF8B2508E99FB9F28, Layers: ["icon.png"] } && layered.Inputs.Contains("icon.png") &&
+                layered.Patches[0].Resources[1] is CopyResource { Lut.Columns: var columns } && columns[21] is [216.625, -1, 1.2, 5], "A layers edit or a four-value LUT cell did not parse.");
+            check(DataSpecs.Unchecked(layered) != null, "Adding layers to a game texture is not counted as an edit of the game's data.");
             File.WriteAllText(Path.Combine(folder, DataSpecs.FileName), """{"format":1,"patches":[{"archives":["1111111111111111"],"resources":[""" + copy +
                 "," + """{"icon":"icon.png","name":"test/mod/icon","prepare":"auto"}]}]}""");
             var spec = DataSpecs.Load(folder)!;
@@ -202,6 +233,29 @@ static class DataBuilderTests
             reject(() => UnitMesh.ReadObj("v 0 0 0\nf 1 2 3\n", 1, true));
             reject(() => UnitMesh.ReadObj("v 0 0 0\n", 1, true));
 
+            // In parts each object names the joint its faces ride: Blender's number on a repeated name is dropped, a
+            // corner shared by two objects is a vertex of each, and faces before the first name ride the main bone.
+            const string partsObj = """
+                v 0 0 0
+                v 1 0 0
+                v 0 1 0
+                v 0 0 1
+                f 1 2 3
+                o l_front_rotation
+                f 1 2 4
+                o l_front_rotation.001
+                f 2 3 4
+                g hood
+                f 1 3 4
+                """;
+            var parted = UnitMesh.ReadObj(partsObj, 1, false, parts: true);
+            check(parted.Joints is { } partJoints && parted.Positions.Count == 10 && partJoints.Count == 10,
+                $"Corners shared by parts are a vertex of each part: {parted.Positions.Count} vertices.");
+            check(parted.Joints![0] == null && parted.Joints[3] == "l_front_rotation" && parted.Joints.Count(j => j == "l_front_rotation") == 4
+                && parted.Joints.Count(j => j == "hood") == 3, "Each part's vertices name its joint, l_front_rotation.001 is l_front_rotation.");
+            check(UnitMesh.ReadObj(partsObj, 1, false).Joints == null && UnitMesh.ReadObj(partsObj, 1, false).Positions.Count == 4,
+                "Without parts, object names are ignored as before.");
+
             var folder = Directory.CreateDirectory(Path.Combine(root, "mesh-spec")).FullName;
             Directory.CreateDirectory(Path.Combine(folder, "models"));
             File.WriteAllText(Path.Combine(folder, "models", "cube.obj"), "v 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3\n");
@@ -212,10 +266,12 @@ static class DataBuilderTests
             check(spec.Inputs.SequenceEqual(["models/cube.obj"]) && spec.Patches[0].Resources[0] is CopyResource { Mesh: { Obj: "models/cube.obj", Scale: 2, YUp: false, UnitSpace: false } },
                 "The mesh and its file are part of the spec (and of its cache key).");
             File.WriteAllText(Path.Combine(folder, DataSpecs.FileName), Spec("""{"obj":"models/cube.obj","unitSpace":true}"""));
-            check(DataSpecs.Load(folder)!.Patches[0].Resources[0] is CopyResource { Mesh: { UnitSpace: true, YUp: true } }, "unitSpace is read.");
+            check(DataSpecs.Load(folder)!.Patches[0].Resources[0] is CopyResource { Mesh: { UnitSpace: true, YUp: true, Parts: false } }, "unitSpace is read.");
+            File.WriteAllText(Path.Combine(folder, DataSpecs.FileName), Spec("""{"obj":"models/cube.obj","parts":true}"""));
+            check(DataSpecs.Load(folder)!.Patches[0].Resources[0] is CopyResource { Mesh: { Parts: true } }, "parts is read.");
             foreach (var (bad, why) in new[] { (Spec("""{"obj":"../cube.obj"}"""), "an .obj file in the mod folder"), (Spec("""{"obj":"models/none.obj"}"""), "is missing"),
                 (Spec("""{"obj":"models/cube.obj"}""", "material"), "mesh is for a unit copy"), (Spec("""{"obj":"models/cube.obj","scale":0}"""), "scale is a positive number"),
-                (Spec("""{"obj":"models/cube.obj","unitSpace":1}"""), "unitSpace is true or false") })
+                (Spec("""{"obj":"models/cube.obj","unitSpace":1}"""), "unitSpace is true or false"), (Spec("""{"obj":"models/cube.obj","parts":"yes"}"""), "parts is true or false") })
             {
                 File.WriteAllText(Path.Combine(folder, DataSpecs.FileName), bad);
                 try { DataSpecs.Load(folder); throw new Exception("Accepted: " + bad); }
@@ -362,6 +418,37 @@ static class DataBuilderTests
             var name = EngineHash.Murmur64A("test/mod/port"u8);
             check(built[new(ResourceTypes.Unit, name)].Gpu.SequenceEqual(new byte[] { 5, 5 }) && built.ContainsKey(new(ResourceTypes.Physics, name)),
                 "The unit from Steam was not copied with its physics.");
+            // A unit copy's own physics: byte edits on the base's, or a file made from the base; renamed to the copy either way.
+            const string edited = """{"type":"unit","copy":"0x3333","name":"test/mod/port","source":"steam","physics":{"bytes":[{"at":"0x58","expect":"00000000","set":"0000803F"}]}}""";
+            check(DataSpecs.Unchecked(Spec(edited)) is { } why && why.Contains("physics"), "Own physics is not marked for mod sync.");
+            ModDataBuilder.Build(Spec(edited), mod, gameReader, output + "p", steamReader);
+            var withEdits = ResourceArchive.Read(File.ReadAllBytes(Path.Combine(output + "p", "1111111111111111.patch_0")),
+                File.ReadAllBytes(Path.Combine(output + "p", "1111111111111111.patch_0.gpu_resources")), [])[new(ResourceTypes.Physics, name)].Main;
+            check(BinaryPrimitives.ReadSingleLittleEndian(withEdits.AsSpan(0x58)) == 1f && BinaryPrimitives.ReadUInt64LittleEndian(withEdits.AsSpan(0x08)) == name &&
+                BinaryPrimitives.ReadUInt64LittleEndian(withEdits.AsSpan(0x50)) == 0x3333, "The physics edits or its rename are missing.");
+            reject(() => ModDataBuilder.Build(Spec(edited.Replace("\"expect\":\"00000000\"", "\"expect\":\"01000000\"")), mod, gameReader, output + "q", steamReader));
+            var own = Physics(0x3333);
+            BinaryPrimitives.WriteSingleLittleEndian(own.AsSpan(0x5C), 2f);
+            Directory.CreateDirectory(Path.Combine(mod, "physics"));
+            File.WriteAllBytes(Path.Combine(mod, "physics", "own.physics"), own);
+            const string owned = """{"type":"unit","copy":"0x3333","name":"test/mod/port","source":"steam","physics":{"file":"physics/own.physics"}}""";
+            check(Spec(owned).Inputs.Contains("physics/own.physics"), "The physics file is not an input of the build.");
+            ModDataBuilder.Build(Spec(owned), mod, gameReader, output + "f", steamReader);
+            var fromFile = ResourceArchive.Read(File.ReadAllBytes(Path.Combine(output + "f", "1111111111111111.patch_0")),
+                File.ReadAllBytes(Path.Combine(output + "f", "1111111111111111.patch_0.gpu_resources")), [])[new(ResourceTypes.Physics, name)].Main;
+            check(BinaryPrimitives.ReadSingleLittleEndian(fromFile.AsSpan(0x5C)) == 2f && BinaryPrimitives.ReadUInt64LittleEndian(fromFile.AsSpan(0x40)) == name,
+                "The physics file was not taken, or not renamed.");
+            File.WriteAllBytes(Path.Combine(mod, "physics", "own.physics"), Physics(0x4444));
+            reject(() => ModDataBuilder.Build(Spec(owned), mod, gameReader, output + "g", steamReader)); // made from another unit
+            reject(() => Spec("""{"type":"unit","copy":"0x3333","name":"test/mod/port","physics":{"file":"physics/own.physics","bytes":[]}}"""));
+            reject(() => Spec("""{"type":"material","copy":"0x7777","name":"test/mod/m","physics":{"file":"physics/own.physics"}}"""));
+            reject(() => Spec("""{"type":"unit","copy":"0x3333","name":"test/mod/port","joints":{"seat":[0,0]}}"""));
+            var hung = Spec("""{"type":"unit","copy":"0x3333","name":"test/mod/port","joints":{"seat":[0,0,1],"wheel":{"at":[1,0,0],"parent":"boss"}}}""").Patches[0].Resources.OfType<CopyResource>().Single();
+            check(hung.Joints!.Count == 2 && hung.JointParents!["wheel"] == "boss" && hung.Joints["wheel"][0] == 1, "A joint given as an object lost its position or its parent.");
+            reject(() => Spec("""{"type":"unit","copy":"0x3333","name":"test/mod/port","joints":{"wheel":{"parent":"boss"}}}""")); // no position
+            reject(() => Spec("""{"type":"unit","copy":"0x3333","name":"test/mod/port","joints":{"wheel":{"at":[1,0,0],"parent":3}}}"""));
+            reject(() => Spec("""{"type":"unit","copy":"0x3333","name":"test/mod/port","joints":{"wheel":{"at":[1,0,0],"turn":1}}}"""));
+            reject(() => ModDataBuilder.Build(Spec("""{"type":"unit","copy":"0x3333","name":"test/mod/port","source":"steam","joints":{"seat":[0,0,1]}}"""), mod, gameReader, output + "j", steamReader)); // no scene graph
             var material = built[new(ResourceTypes.Material, 0x7777)].Main;
             check(BinaryPrimitives.ReadInt32LittleEndian(material.AsSpan(0x40)) == 1 && Value(material, 0x50) == 42 &&
                 BinaryPrimitives.ReadUInt64LittleEndian(material.AsSpan(0x88 + 4)) == 0x101, "The material from Steam is not in the game copy's shader layout.");
@@ -768,7 +855,7 @@ static class DataBuilderTests
             var mean = (pixels[0] + pixels[4] + pixels[32] + pixels[36] + 2) / 4;
             check(rgba.Gpu.Length == 4 * (64 + 16 + 4 + 1) && rgba.Gpu.AsSpan(0, 256).SequenceEqual(pixels) && rgba.Gpu[256] == mean,
                 "The RGBA8 chain is not the pixels, then box-filtered levels.");
-            foreach (var (format, dxgi, block) in new[] { ("bc1", 71, 8), ("bc3", 77, 16), ("bc4", 80, 8), ("bc5", 83, 16) })
+            foreach (var (format, dxgi, block) in new[] { ("bc1", 71, 8), ("bc3", 77, 16), ("bc4", 80, 8), ("bc5", 83, 16), ("bc7", 98, 16) })
             {
                 var t = TextureImage.Build([png], format);
                 check(U32(t.Main, 0) == 0 && U32(t.Main, 0xC4 + 124) == dxgi && U32(t.Main, 0xC4 + 16) == 0 && t.Gpu.Length == (4 + 1 + 1 + 1) * block, $"{format}: wrong format or chain size.");
@@ -779,7 +866,25 @@ static class DataBuilderTests
             var dot = TextureImage.Build([Png([1, 2, 3, 4], 1)], "rgba8");
             check(U32(dot.Main, 0xC4 + 4) == 0x1007 && U32(dot.Main, 0xC4 + 104) == 0x1000 && dot.Gpu.SequenceEqual(new byte[] { 1, 2, 3, 4 }), "A single level keeps the mip flags.");
             check(TextureImage.MipCount(23, 8) == 5, "The game's 23 x 8 lookups have 5 levels.");
-            reject(() => TextureImage.Build([png], "bc7"));
+            reject(() => TextureImage.Build([png], "bc6h"));
+            var smooth = new byte[16 * 16 * 4];
+            for (var i = 0; i < smooth.Length; i += 4) (smooth[i], smooth[i + 1], smooth[i + 2], smooth[i + 3]) = ((byte)(i / 4 % 16 * 16), (byte)(40 + i / 4 % 16 * 8), 200, (byte)(255 - i / 4 % 16 * 8));
+            var bc7 = Bc7.Level(16, 16, smooth);
+            var worst = 0;
+            for (var b = 0; b < 16; b++)
+            {
+                var decoded = Bc7.DecodeMode6(bc7.AsSpan(16 * b, 16));
+                for (var k = 0; k < 16; k++)
+                    for (var c = 0; c < 4; c++)
+                        worst = Math.Max(worst, Math.Abs(decoded[4 * k + c] - smooth[4 * ((b / 4 * 4 + k / 4) * 16 + b % 4 * 4 + k % 4) + c]));
+            }
+            check(worst <= 3, $"BC7 mode 6 decodes a gradient along one line {worst} levels off (at most 3 expected).");
+            var flat = new int[64];
+            for (var k = 0; k < 16; k++) (flat[4 * k], flat[4 * k + 1], flat[4 * k + 2], flat[4 * k + 3]) = (77, 128, 3, 250);
+            var one = new byte[16];
+            Bc7.EncodeBlock(flat, one);
+            var back = Bc7.DecodeMode6(one);
+            check(back.Select((v, i) => Math.Abs(v - flat[i])).Max() <= 1, "BC7 mode 6 does not keep a flat block within one level.");
             reject(() => TextureImage.Build([png, Png(new byte[4 * 4 * 4], 4)], "rgba8"));
 
             var material = Material(0x2222);
@@ -810,7 +915,7 @@ static class DataBuilderTests
             check(DataSpecs.Unchecked(Spec("""{"type":"unit","copy":"0x3333","name":"test/mod/u","textures":{"base_data":"0x1"}}""")) is { } why && why.Contains("as another type"),
                 "Textures on a unit copy count as checked.");
             foreach (var (bad, reason) in new[] { ("""{"texture":"textures/a.png","name":"test/mod/t"}""", "format"),
-                ("""{"texture":"textures/a.png","name":"test/mod/t","format":"bc7"}""", "format is rgba8"),
+                ("""{"texture":"textures/a.png","name":"test/mod/t","format":"bc6h"}""", "format is rgba8"),
                 ("""{"texture":"../a.png","name":"test/mod/t","format":"bc1"}""", "a .png file in the mod folder"),
                 ("""{"texture":"textures/none.png","name":"test/mod/t","format":"bc1"}""", "is missing"),
                 ("""{"type":"material","copy":"0x1111","name":"test/mod/m","textures":{}}""", "textures is empty") })

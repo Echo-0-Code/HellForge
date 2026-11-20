@@ -34,17 +34,29 @@ public abstract record DataResource(string Where)
 }
 public sealed record CopyResource(string Where, ulong Type, ulong From, string Name, IReadOnlyDictionary<int, ulong> Expect,
     IReadOnlyList<Replacement> Replace, CurveEdit? Curves, IReadOnlyDictionary<uint, double[]>? Colours, ResourceEdits.LutRecolour? Lut, MeshFile? Mesh = null,
-    IReadOnlyDictionary<uint, ulong>? Textures = null, IReadOnlyList<ShaderFile>? Shaders = null) : DataResource(Where);
+    IReadOnlyDictionary<uint, ulong>? Textures = null, IReadOnlyList<ShaderFile>? Shaders = null) : DataResource(Where)
+{
+    // A unit copy's own physics instead of its base's (UnitJoints.cs PhysicsSpec), and joints moved to new rest
+    // positions in the unit's space, by name ("#" and the hash for a joint the game names only by hash).
+    public PhysicsSpec? Physics { get; init; }
+    public IReadOnlyDictionary<string, double[]>? Joints { get; init; }
+    // Joints given a new parent ("joints": {"name": {"at": [x, y, z], "parent": "boss"}}): a joint the game animates
+    // keeps its old parent's pose, so a part that must follow the body hangs from a joint the clips leave alone.
+    public IReadOnlyDictionary<string, string>? JointParents { get; init; }
+}
 // A unit copy's own geometry: an OBJ in the mod folder (UnitMesh), scaled, Y-up or the game's Z-up; with UnitSpace its
 // coordinates are the unit's own (the frame its joints and attach points are in), otherwise its render mesh's.
-public sealed record MeshFile(string Obj, double Scale, bool YUp, bool UnitSpace = false);
+// With Parts, each object of the OBJ rides the unit joint it is named after, in the unit's own space (UnitMesh).
+public sealed record MeshFile(string Obj, double Scale, bool YUp, bool UnitSpace = false, bool Parts = false);
 // A material copy's own code for a shader stage: the stage's offset in the GPU part, a compiled shader in the mod folder, and
 // for a shader host's stage what the game's stage must be.
 public sealed record ShaderFile(int Offset, string Dxbc, HostStage? Host = null);
 public sealed record IncludeResources(string Where, ulong Type, IReadOnlyList<ulong> Ids) : DataResource(Where);
 // A game resource edited in place: each stage is the signed DXBC container at At in the GPU part, which must carry Digest,
-// with bytes set at offsets inside the container.
-public sealed record EditResource(string Where, ulong Type, ulong Id, IReadOnlyList<StageEdit> Stages, IReadOnlyList<BytesEdit> Bytes, GpuPin? Gpu) : DataResource(Where);
+// with bytes set at offsets inside the container. A texture edit can instead add layers (PNGs in the mod folder) after
+// the game's own, so an array texture such as the weapons' camouflage tiler keeps its layers and gains more.
+public sealed record EditResource(string Where, ulong Type, ulong Id, IReadOnlyList<StageEdit> Stages, IReadOnlyList<BytesEdit> Bytes, GpuPin? Gpu,
+    IReadOnlyList<string>? Layers = null) : DataResource(Where);
 public sealed record StageEdit(int At, byte[] Digest, IReadOnlyList<(int Offset, byte[] Bytes)> Set);
 public sealed record BytesEdit(int At, byte[] Expect, byte[] Set);
 public sealed record GpuPin(int? Size, byte[]? Sha256);
@@ -111,6 +123,8 @@ public static partial class DataSpecs
                     return $"{copy.Where} copies a {ResourceTypes.Describe(copy.Type)} resource";
                 case CopyResource copy when copy.Replace.Count > 0:
                     return $"{copy.Where} replaces values (\"replace\")";
+                case CopyResource { Physics: not null } copy:
+                    return $"{copy.Where} brings its own physics";
                 case CopyResource { Shaders.Count: > 0 } copy:
                     return $"{copy.Where} brings its own shader code";
                 case ShaderResource shader:
@@ -217,7 +231,7 @@ public static partial class DataSpecs
             case "animations": return ReadAnimations(e, at, folder, inputs);
             case "model": return ReadModel(e, at, folder, inputs);
             case "sounds": return ReadSounds(e, at, folder, inputs);
-            case "edit": return ReadEdit(e, at);
+            case "edit": return ReadEdit(e, at, folder, inputs);
         }
         return ReadCopy(e, at, folder, inputs);
     }
@@ -346,7 +360,7 @@ public static partial class DataSpecs
     // A copy, its edits read in the spec's order.
     static CopyResource ReadCopy(JsonElement e, string at, string? folder, ISet<string> inputs)
     {
-        Fields(e, at, "type", "copy", "name", "expect", "replace", "curves", "colours", "textures", "lut", "mesh", "shader", "source");
+        Fields(e, at, "type", "copy", "name", "expect", "replace", "curves", "colours", "textures", "lut", "mesh", "shader", "source", "physics", "joints");
         var type = Type(e, at);
         var expect = ReadExpect(e, at);
         var replace = ReadReplace(e, at);
@@ -357,7 +371,10 @@ public static partial class DataSpecs
         var mesh = ReadMesh(e, at, type, folder, inputs);
         var shaders = ReadShaders(e, at, type, folder, inputs);
         var (steam, build) = Source(e, at);
-        return new CopyResource(at, type, Id(Property(e, "copy", at), at), Name(e, at), expect, replace, curves, colours, lut, mesh, textures, shaders) { Steam = steam, Build = build };
+        var physics = ReadPhysics(e, at, type, folder, inputs);
+        var joints = ReadJoints(e, at, type);
+        return new CopyResource(at, type, Id(Property(e, "copy", at), at), Name(e, at), expect, replace, curves, colours, lut, mesh, textures, shaders)
+            { Steam = steam, Build = build, Physics = physics, Joints = joints?.Item1, JointParents = joints is { Item2.Count: > 0 } j ? j.Item2 : null };
     }
 
     // A shader in a host, which says what else the resource needs.
@@ -477,7 +494,7 @@ public static partial class DataSpecs
     {
         if (!e.TryGetProperty("mesh", out var meshSpec)) return null;
         if (type != ResourceTypes.Unit) throw new InvalidDataException($"{at}: mesh is for a unit copy.");
-        Fields(meshSpec, $"{at}.mesh", "obj", "scale", "yUp", "unitSpace");
+        Fields(meshSpec, $"{at}.mesh", "obj", "scale", "yUp", "unitSpace", "parts");
         var obj = Text(meshSpec, "obj", $"{at}.mesh").Replace('\\', '/');
         if (Path.IsPathRooted(obj) || obj.Split('/').Any(part => part is "" or "." or "..") || !obj.EndsWith(".obj", StringComparison.OrdinalIgnoreCase))
             throw new InvalidDataException($"{at}.mesh: obj is an .obj file in the mod folder, such as \"models/cube.obj\".");
@@ -485,8 +502,73 @@ public static partial class DataSpecs
         var scale = meshSpec.TryGetProperty("scale", out var sc) ? (sc.ValueKind == JsonValueKind.Number && sc.GetDouble() is > 0 and < 1000 and var v ? v : throw new InvalidDataException($"{at}.mesh: scale is a positive number.")) : 1.0;
         var yUp = !meshSpec.TryGetProperty("yUp", out var up) || (up.ValueKind is JsonValueKind.True or JsonValueKind.False ? up.GetBoolean() : throw new InvalidDataException($"{at}.mesh: yUp is true or false."));
         var unitSpace = meshSpec.TryGetProperty("unitSpace", out var us) && (us.ValueKind is JsonValueKind.True or JsonValueKind.False ? us.GetBoolean() : throw new InvalidDataException($"{at}.mesh: unitSpace is true or false."));
+        var parts = meshSpec.TryGetProperty("parts", out var pa) && (pa.ValueKind is JsonValueKind.True or JsonValueKind.False ? pa.GetBoolean() : throw new InvalidDataException($"{at}.mesh: parts is true or false."));
         inputs.Add(obj);
-        return new(obj, scale, yUp, unitSpace);
+        return new(obj, scale, yUp, unitSpace, parts);
+    }
+
+    // "physics": {"file": "physics/quad.physics"} (a whole physics resource made from the copy's base) or
+    // {"bytes": [{"at", "expect", "set"}]} (edits on the copy of the base's physics). Only on a unit copy.
+    static PhysicsSpec? ReadPhysics(JsonElement e, string at, ulong type, string? folder, ISet<string> inputs)
+    {
+        if (!e.TryGetProperty("physics", out var spec)) return null;
+        if (type != ResourceTypes.Unit) throw new InvalidDataException($"{at}: physics is for a unit copy.");
+        if (spec.ValueKind != JsonValueKind.Object) throw new InvalidDataException($"{at}.physics: an object with file or bytes.");
+        Fields(spec, $"{at}.physics", "file", "bytes");
+        var hasFile = spec.TryGetProperty("file", out _);
+        var hasBytes = spec.TryGetProperty("bytes", out _);
+        if (hasFile == hasBytes) throw new InvalidDataException($"{at}.physics: give file or bytes, not both.");
+        if (hasBytes) return new(null, ReadBytes(spec, $"{at}.physics"));
+        var file = Text(spec, "file", $"{at}.physics").Replace('\\', '/');
+        if (Path.IsPathRooted(file) || file.Split('/').Any(part => part is "" or "." or ".."))
+            throw new InvalidDataException($"{at}.physics: file is a file in the mod folder, such as \"physics/quad.physics\".");
+        if (folder != null && !File.Exists(Path.Combine(folder, file))) throw new InvalidDataException($"{at}.physics: {file} is missing.");
+        inputs.Add(file);
+        return new(file, []);
+    }
+
+    // "joints": {"attach_driver": [x, y, z], "#cf12eb4f": [x, y, z], "l_rear_rotation": {"at": [x, y, z], "parent": "boss"}}:
+    // rest positions in the unit's own space (metres), and for a joint given as an object, optionally a new parent.
+    static (Dictionary<string, double[]>, Dictionary<string, string>)? ReadJoints(JsonElement e, string at, ulong type)
+    {
+        if (!e.TryGetProperty("joints", out var spec)) return null;
+        if (type != ResourceTypes.Unit) throw new InvalidDataException($"{at}: joints is for a unit copy.");
+        var joints = new Dictionary<string, double[]>();
+        var parents = new Dictionary<string, string>();
+        foreach (var joint in Object(spec, $"{at}.joints"))
+        {
+            var where = $"{at}.joints.{joint.Name}";
+            if (joint.Name.Length is 0 or > 100) throw new InvalidDataException($"{where}: a joint's name, or # and its 8-digit hash.");
+            var (xyz, parent) = ReadJoint(joint.Value, where);
+            joints[joint.Name] = xyz;
+            if (parent != null) parents[joint.Name] = parent;
+        }
+        if (joints.Count == 0) throw new InvalidDataException($"{at}.joints names no joint.");
+        return (joints, parents);
+    }
+
+    // One joint: [x, y, z], or {"at": [x, y, z], "parent": "<joint>"}.
+    static (double[], string?) ReadJoint(JsonElement v, string where)
+    {
+        if (v.ValueKind != JsonValueKind.Object) return (Position(v, where), null);
+        Fields(v, where, "at", "parent");
+        string? name = null;
+        if (v.TryGetProperty("parent", out var parent))
+        {
+            name = parent.ValueKind == JsonValueKind.String ? parent.GetString() : null;
+            if (name is not { Length: > 0 and <= 100 }) throw new InvalidDataException($"{where}.parent: a joint's name, or # and its 8-digit hash.");
+        }
+        if (!v.TryGetProperty("at", out var position)) throw new InvalidDataException($"{where}: at [x, y, z] is required.");
+        return (Position(position, where), name);
+    }
+
+    static double[] Position(JsonElement v, string where)
+    {
+        if (v.ValueKind != JsonValueKind.Array || v.GetArrayLength() != 3 || v.EnumerateArray().Any(x => x.ValueKind != JsonValueKind.Number))
+            throw new InvalidDataException($"{where}: a position [x, y, z] in metres.");
+        var xyz = v.EnumerateArray().Select(x => x.GetDouble()).ToArray();
+        if (xyz.Any(x => !double.IsFinite(x) || Math.Abs(x) > 100)) throw new InvalidDataException($"{where}: each coordinate is within 100 m of the unit's origin.");
+        return xyz;
     }
 
     // "source": "game" (the default), "steam", or {"build": "<depot>:<manifest>"} / {"build": "yyyy-MM-dd"} (the build of
@@ -524,7 +606,26 @@ public static partial class DataSpecs
     }
 
     static Dictionary<int, double[]> Cells(JsonElement e, string at) =>
-        Object(e, at).ToDictionary(item => Index(item.Name, at), item => Colour(item.Value, at));
+        Object(e, at).ToDictionary(item => Index(item.Name, at), item => LutCell(item.Value, at));
+
+    // A lookup texture's cell: a colour, or [r, g, b, a] to set all four of its 16-bit floats. The fourth value and
+    // negative ones are data the shader reads (such as column 21's camouflage layer, or -1 for none), so any value a
+    // half float holds is taken.
+    static double[] LutCell(JsonElement e, string at)
+    {
+        if (e.ValueKind == JsonValueKind.Array && e.GetArrayLength() == 4 && e.EnumerateArray().All(v => v.ValueKind == JsonValueKind.Number))
+        {
+            var rgba = e.EnumerateArray().Select(v => v.GetDouble()).ToArray();
+            if (rgba.All(v => double.IsFinite(v) && Math.Abs(v) <= 65504)) return rgba;
+            throw new InvalidDataException($"{at}: a cell's values are numbers from -65504 to 65504.");
+        }
+        if (e.ValueKind == JsonValueKind.Array && e.GetArrayLength() == 3 && e.EnumerateArray().All(v => v.ValueKind == JsonValueKind.Number))
+        {
+            var rgb = e.EnumerateArray().Select(v => v.GetDouble()).ToArray();
+            if (rgb.All(v => double.IsFinite(v) && Math.Abs(v) <= 65504)) return rgb;
+        }
+        return e.ValueKind == JsonValueKind.String ? Colour(e, at) : throw new InvalidDataException($"{at}: a cell is [r, g, b], [r, g, b, a] or \"#RRGGBB\".");
+    }
 
     static int Index(string text, string at) =>
         int.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out var index) && index < 256 ? index
@@ -542,13 +643,32 @@ public static partial class DataSpecs
 
     // An edit in place: shader stages, each pinned by the game container's digest, and bytes outside the stages, each
     // pinned by the game's own bytes there, so another game build or a wrong offset is refused before anything is written.
-    static EditResource ReadEdit(JsonElement e, string at)
+    static EditResource ReadEdit(JsonElement e, string at, string? folder, ISet<string> inputs)
     {
-        Fields(e, at, "type", "edit", "gpu", "stages", "bytes");
+        Fields(e, at, "type", "edit", "gpu", "stages", "bytes", "layers");
+        if (e.TryGetProperty("layers", out var layerSpec)) return ReadLayers(e, layerSpec, at, folder, inputs);
         var stages = e.TryGetProperty("stages", out _) ? ReadStages(e, at) : [];
         var bytes = e.TryGetProperty("bytes", out _) ? ReadBytes(e, at) : [];
         if (stages.Count == 0 && bytes.Count == 0) throw new InvalidDataException($"{at}: an edit needs stages or bytes.");
         return new EditResource(at, Type(e, at), Id(Property(e, "edit", at), at), stages, bytes, e.TryGetProperty("gpu", out var gpu) ? ReadGpuPin(gpu, $"{at}.gpu") : null);
+    }
+
+    // "layers": PNGs in the mod folder added after a game array texture's own layers (TextureImage.AppendLayers).
+    static EditResource ReadLayers(JsonElement e, JsonElement layerSpec, string at, string? folder, ISet<string> inputs)
+    {
+        if (e.TryGetProperty("stages", out _) || e.TryGetProperty("bytes", out _) || e.TryGetProperty("gpu", out _))
+            throw new InvalidDataException($"{at}: layers is an edit of its own, without stages, bytes or gpu.");
+        if (Type(e, at) != ResourceTypes.Texture) throw new InvalidDataException($"{at}: layers is for a texture edit.");
+        var pngs = (layerSpec.ValueKind == JsonValueKind.Array ? layerSpec.EnumerateArray().ToList() : [])
+            .Select(p => p.ValueKind == JsonValueKind.String ? p.GetString()!.Replace('\\', '/') : "").ToList();
+        if (pngs.Count == 0 || pngs.Any(p => !InModFolder(p) || !p.EndsWith(".png", StringComparison.OrdinalIgnoreCase)))
+            throw new InvalidDataException($"{at}: layers is a list of .png files in the mod folder, one per added layer.");
+        foreach (var png in pngs)
+        {
+            if (folder != null && !File.Exists(Path.Combine(folder, png))) throw new InvalidDataException($"{at}: {png} is missing.");
+            inputs.Add(png);
+        }
+        return new EditResource(at, ResourceTypes.Texture, Id(Property(e, "edit", at), at), [], [], null, pngs);
     }
 
     // "gpu": { "size", "sha256" }: the whole GPU part as the spec was written for. Offsets that are right on one build can
