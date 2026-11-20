@@ -88,6 +88,11 @@ EXTRA = {
                                           'type': 1617084979},
     'LocomotionComponentData': {'offset': 45414912, 'header': '906707884c444c44010000009067078850900e000100000000000000', 'index': 311,
                                 'indices': 408, 'records': 205, 'record_offset': 6528, 'stride': 4624, 'type': 2282186640},
+    # The same way: the feed belt a backpack stretches to the held weapon (TwoPointChain), and the weapon's end of it.
+    'TwoPointChainComponentData': {'offset': 27296600, 'header': '741185e24c444c4401000000741185e2f80100000100000000000000', 'index': 252,
+                                   'indices': 6, 'records': 3, 'record_offset': 96, 'stride': 136, 'type': 3800371572},
+    'TwoPointChainAttachTargetComponentData': {'offset': 27296448, 'header': '50fa02744c444c440100000050fa0274780000000100000000000000',
+                                               'index': 251, 'indices': 6, 'records': 3, 'record_offset': 96, 'stride': 8, 'type': 1946352208},
 }
 for name, c in EXTRA.items():
     components.setdefault(name, c)
