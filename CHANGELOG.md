@@ -390,6 +390,8 @@ On `dev`, since 0.4.0-beta.
 
 ### Fixed
 
+- **An open modal screen draws over every other mod's screens.** A button another mod added later drew over an open
+  picker.
 - **40,960 catalogue items again.** The larger entity table made the game state's arrays stay in place, so the game
   kept 4,096 catalogue items and the backend refused mod paints past them. Both now grow the same block together (#497).
 - **A sandboxed game with DLSS on closes at the first ALT-F4.**
