@@ -399,6 +399,8 @@ On `dev`, since 0.4.0-beta.
 
 ### Fixed
 
+- **An open modal screen draws over every other mod's screens.** A button another mod added later drew over an open
+  picker.
 - **Every mapped function resolves by name.** The loader kept only the first 512 of the 559 functions mapped for
   game build 25480438, so `function` and `hook_function` answered "not a mapped function" for the rest, `UnitWorldPose`,
   `UnitNode` and `LightSetEnabled` among them. It now has room for 1,024, and a mappings update that outgrows that fails
