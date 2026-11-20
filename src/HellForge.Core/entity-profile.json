@@ -186,6 +186,16 @@
    "stride": 568,
    "type": 2844504406
   },
+  "InteractableComponentData": {
+   "offset": 26651752,
+   "header": "db29cafc4c444c4401000000db29cafcb0a709000100000000000000",
+   "index": 244,
+   "indices": 1114,
+   "records": 557,
+   "recordOffset": 17824,
+   "stride": 1104,
+   "type": 4241107419
+  },
   "InventoryComponentData": {
    "offset": 26614280,
    "header": "3bb4da8a4c444c44010000003bb4da8ab03b00000100000000000000",
@@ -455,6 +465,16 @@
    "recordOffset": 54112,
    "stride": 136,
    "type": 1144477517
+  },
+  "VehicleComponentData": {
+   "offset": 1385984,
+   "header": "0d2bebea4c444c44010000000d2bebea583201000100000000000000",
+   "index": 91,
+   "indices": 40,
+   "records": 21,
+   "recordOffset": 640,
+   "stride": 3704,
+   "type": 3941280525
   },
   "VehicleMotionComponentData": {
    "offset": 18933432,

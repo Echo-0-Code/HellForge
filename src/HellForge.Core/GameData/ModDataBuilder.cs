@@ -144,7 +144,27 @@ public static class ModDataBuilder
             }
             added.Add(copied);
             var physics = new ResourceKey(ResourceTypes.Physics, copy.From);
-            if (copy.Type == ResourceTypes.Unit && Has(physics, From(copy)))
+            if (copy.Type == ResourceTypes.Unit && copy.Physics is { } own)
+            {
+                // The copy's own physics: a file made from its base, or edits on the base's.
+                ResourceParts parts;
+                try
+                {
+                    if (own.File is { } file)
+                        parts = new(PhysicsEdits.Check(File.ReadAllBytes(Path.Combine(modFolder, file)), copy.From, file), [], []);
+                    else
+                    {
+                        if (!Has(physics, From(copy))) throw new InvalidDataException($"unit 0x{copy.From:X16} has no physics to edit.");
+                        var source = Read(physics, From(copy));
+                        parts = source with { Main = PhysicsEdits.Apply(source.Main, own.Bytes) };
+                    }
+                }
+                catch (InvalidDataException error) { throw new InvalidDataException($"{copy.Where}.physics: {error.Message}"); }
+                var named = new ResourceKey(ResourceTypes.Physics, copied.Name);
+                AddResource(resources, copy.Where, named, RenamePhysics(parts, copy.From, copied.Name));
+                added.Add(named);
+            }
+            else if (copy.Type == ResourceTypes.Unit && Has(physics, From(copy)))
             {
                 var named = new ResourceKey(ResourceTypes.Physics, copied.Name);
                 AddResource(resources, copy.Where, named, RenamePhysics(Read(physics, From(copy)), copy.From, copied.Name));
@@ -362,13 +382,15 @@ public static class ModDataBuilder
             ShaderSplice.RenameMaterial(gpu, Hash(copy.Name));
             ShaderSplice.RenameTemplates(gpu, Hash(copy.Name));
         }
-        if (copy.Mesh is { } mesh)
-        {
-            if (source.Stream.Length != 0) throw new InvalidDataException("the model streams part of itself; HellForge cannot replace its mesh yet.");
-            var (meshMain, meshGpu) = UnitMesh.Replace(main, gpu, UnitMesh.ReadObj(File.ReadAllText(Path.Combine(modFolder, mesh.Obj)), mesh.Scale, mesh.YUp, mesh.Parts), mesh.UnitSpace);
-            return new(meshMain, meshGpu, source.Stream);
-        }
-        return new(main, gpu, source.Stream);
+        if (copy.Joints is { } joints) UnitJoints.Move(main, joints, copy.JointParents);
+        return copy.Mesh is { } mesh ? ReplaceMesh(mesh, main, gpu, source.Stream, modFolder) : new(main, gpu, source.Stream);
+    }
+
+    static ResourceParts ReplaceMesh(MeshFile mesh, byte[] main, byte[] gpu, byte[] stream, string modFolder)
+    {
+        if (stream.Length != 0) throw new InvalidDataException("the model streams part of itself; HellForge cannot replace its mesh yet.");
+        var (meshMain, meshGpu) = UnitMesh.Replace(main, gpu, UnitMesh.ReadObj(File.ReadAllText(Path.Combine(modFolder, mesh.Obj)), mesh.Scale, mesh.YUp, mesh.Parts), mesh.UnitSpace);
+        return new(meshMain, meshGpu, stream);
     }
 
     // The warm colour curve keys recoloured, as many as the spec says when it says.

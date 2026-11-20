@@ -12,6 +12,16 @@ On `dev`, since 0.4.0-beta.
 
 ### Added
 
+- **Fewer seats or no gun on a vehicle copy.** `Interactable` is mapped: set a seat's interact zone type and radius to 0
+  to close it (the FRV's roof seat is zone 2), and `Mount.slot0_entity` to 0 to take its gun off
+  ([new vehicles](docs/modding/vehicles.md)).
+- **Vehicles with physics of their own, and seats that move.** A unit copy's `physics` takes a physics file from the
+  mod folder or byte edits on its base's, and its `joints` moves seats, interact points and other joints, with what
+  rides them. `Vehicle` maps which joints each physics wheel turns, and `Interactable` each zone's joint and offset
+  ([new vehicles](docs/modding/vehicles.md#physics-of-its-own)).
+- **A moved joint can change parent.** A joint given as `{"at": [x, y, z], "parent": "boss"}` keeps its world
+  rotation under its new parent. The game animates a vehicle's bones from its base's poses, so a wheel moved under its
+  suspension arms is drawn where the base's was. Hung from the body, it stays where it was put.
 - **48 mod paints a weapon.** A weapon's customize screen lists up to 127 cards instead of 64, so mods' paints go up to
   48 on one weapon instead of 16. Only on game build 25480438; otherwise the limit stays 16 (#498).
 - **Languages in Settings.** A Languages card lists the language packs pinned for the build and adds one to the game

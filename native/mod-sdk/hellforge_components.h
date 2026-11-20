@@ -4932,6 +4932,294 @@ HF_ASSERT_OFFSET(HfStatusEffectReceiver, duration_7_type, 46592);
 HF_ASSERT_OFFSET(HfStatusEffectReceiver, duration_7_multiplier, 46596);
 #define HF_TYPE_StatusEffectReceiver_duration_7_multiplier HF_TYPE_F32
 
+/* InteractableComponentData (component 244, 1104-byte records): how players use an entity: eight 0x88-byte interact zones (a vehicle's seats, a rack's pickup) */
+#define HfInteractable_INFO "InteractableComponentData", 25480438u
+typedef struct HfInteractable
+{
+    uint8_t _unknown_00[12];
+    float zone0_radius;                          /* +0x0C interact zone 0: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) [respawn?] */
+    uint8_t _unknown_10[4];
+    uint32_t zone0_joint;                        /* +0x14 interact zone 0: the joint it sits on (thin hash; the M-102 driver zone 3 uses interact_driver); a moved joint (a unit copy's "joints") moves the zone (unverified) [respawn?] */
+    float zone0_offset_x;                        /* +0x18 interact zone 0: its offset from its joint, x (metres) (unverified) [respawn?] */
+    float zone0_offset_y;                        /* +0x1C interact zone 0: its offset from its joint, y (metres) (unverified) [respawn?] */
+    float zone0_offset_z;                        /* +0x20 interact zone 0: its offset from its joint, z (metres) (unverified) [respawn?] */
+    uint8_t _unknown_24[12];
+    uint32_t zone0_type;                         /* +0x30 interact zone 0: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
+    uint8_t _unknown_34[96];
+    float zone1_radius;                          /* +0x94 interact zone 1: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) [respawn?] */
+    uint8_t _unknown_98[4];
+    uint32_t zone1_joint;                        /* +0x9C interact zone 1: the joint it sits on (thin hash; the M-102 driver zone 3 uses interact_driver); a moved joint (a unit copy's "joints") moves the zone (unverified) [respawn?] */
+    float zone1_offset_x;                        /* +0xA0 interact zone 1: its offset from its joint, x (metres) (unverified) [respawn?] */
+    float zone1_offset_y;                        /* +0xA4 interact zone 1: its offset from its joint, y (metres) (unverified) [respawn?] */
+    float zone1_offset_z;                        /* +0xA8 interact zone 1: its offset from its joint, z (metres) (unverified) [respawn?] */
+    uint8_t _unknown_AC[12];
+    uint32_t zone1_type;                         /* +0xB8 interact zone 1: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
+    uint8_t _unknown_BC[96];
+    float zone2_radius;                          /* +0x11C interact zone 2: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) [respawn?] */
+    uint8_t _unknown_120[4];
+    uint32_t zone2_joint;                        /* +0x124 interact zone 2: the joint it sits on (thin hash; the M-102 driver zone 3 uses interact_driver); a moved joint (a unit copy's "joints") moves the zone (unverified) [respawn?] */
+    float zone2_offset_x;                        /* +0x128 interact zone 2: its offset from its joint, x (metres) (unverified) [respawn?] */
+    float zone2_offset_y;                        /* +0x12C interact zone 2: its offset from its joint, y (metres) (unverified) [respawn?] */
+    float zone2_offset_z;                        /* +0x130 interact zone 2: its offset from its joint, z (metres) (unverified) [respawn?] */
+    uint8_t _unknown_134[12];
+    uint32_t zone2_type;                         /* +0x140 interact zone 2: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
+    uint8_t _unknown_144[96];
+    float zone3_radius;                          /* +0x1A4 interact zone 3: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) [respawn?] */
+    uint8_t _unknown_1A8[4];
+    uint32_t zone3_joint;                        /* +0x1AC interact zone 3: the joint it sits on (thin hash; the M-102 driver zone 3 uses interact_driver); a moved joint (a unit copy's "joints") moves the zone (unverified) [respawn?] */
+    float zone3_offset_x;                        /* +0x1B0 interact zone 3: its offset from its joint, x (metres) (unverified) [respawn?] */
+    float zone3_offset_y;                        /* +0x1B4 interact zone 3: its offset from its joint, y (metres) (unverified) [respawn?] */
+    float zone3_offset_z;                        /* +0x1B8 interact zone 3: its offset from its joint, z (metres) (unverified) [respawn?] */
+    uint8_t _unknown_1BC[12];
+    uint32_t zone3_type;                         /* +0x1C8 interact zone 3: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
+    uint8_t _unknown_1CC[96];
+    float zone4_radius;                          /* +0x22C interact zone 4: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) [respawn?] */
+    uint8_t _unknown_230[4];
+    uint32_t zone4_joint;                        /* +0x234 interact zone 4: the joint it sits on (thin hash; the M-102 driver zone 3 uses interact_driver); a moved joint (a unit copy's "joints") moves the zone (unverified) [respawn?] */
+    float zone4_offset_x;                        /* +0x238 interact zone 4: its offset from its joint, x (metres) (unverified) [respawn?] */
+    float zone4_offset_y;                        /* +0x23C interact zone 4: its offset from its joint, y (metres) (unverified) [respawn?] */
+    float zone4_offset_z;                        /* +0x240 interact zone 4: its offset from its joint, z (metres) (unverified) [respawn?] */
+    uint8_t _unknown_244[12];
+    uint32_t zone4_type;                         /* +0x250 interact zone 4: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
+    uint8_t _unknown_254[96];
+    float zone5_radius;                          /* +0x2B4 interact zone 5: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) [respawn?] */
+    uint8_t _unknown_2B8[4];
+    uint32_t zone5_joint;                        /* +0x2BC interact zone 5: the joint it sits on (thin hash; the M-102 driver zone 3 uses interact_driver); a moved joint (a unit copy's "joints") moves the zone (unverified) [respawn?] */
+    float zone5_offset_x;                        /* +0x2C0 interact zone 5: its offset from its joint, x (metres) (unverified) [respawn?] */
+    float zone5_offset_y;                        /* +0x2C4 interact zone 5: its offset from its joint, y (metres) (unverified) [respawn?] */
+    float zone5_offset_z;                        /* +0x2C8 interact zone 5: its offset from its joint, z (metres) (unverified) [respawn?] */
+    uint8_t _unknown_2CC[12];
+    uint32_t zone5_type;                         /* +0x2D8 interact zone 5: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
+    uint8_t _unknown_2DC[96];
+    float zone6_radius;                          /* +0x33C interact zone 6: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) [respawn?] */
+    uint8_t _unknown_340[4];
+    uint32_t zone6_joint;                        /* +0x344 interact zone 6: the joint it sits on (thin hash; the M-102 driver zone 3 uses interact_driver); a moved joint (a unit copy's "joints") moves the zone (unverified) [respawn?] */
+    float zone6_offset_x;                        /* +0x348 interact zone 6: its offset from its joint, x (metres) (unverified) [respawn?] */
+    float zone6_offset_y;                        /* +0x34C interact zone 6: its offset from its joint, y (metres) (unverified) [respawn?] */
+    float zone6_offset_z;                        /* +0x350 interact zone 6: its offset from its joint, z (metres) (unverified) [respawn?] */
+    uint8_t _unknown_354[12];
+    uint32_t zone6_type;                         /* +0x360 interact zone 6: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
+    uint8_t _unknown_364[96];
+    float zone7_radius;                          /* +0x3C4 interact zone 7: its size (0.6 to 0.8 on seats; 0 on unused zones, which show no prompt) (unverified) [respawn?] */
+    uint8_t _unknown_3C8[4];
+    uint32_t zone7_joint;                        /* +0x3CC interact zone 7: the joint it sits on (thin hash; the M-102 driver zone 3 uses interact_driver); a moved joint (a unit copy's "joints") moves the zone (unverified) [respawn?] */
+    float zone7_offset_x;                        /* +0x3D0 interact zone 7: its offset from its joint, x (metres) (unverified) [respawn?] */
+    float zone7_offset_y;                        /* +0x3D4 interact zone 7: its offset from its joint, y (metres) (unverified) [respawn?] */
+    float zone7_offset_z;                        /* +0x3D8 interact zone 7: its offset from its joint, z (metres) (unverified) [respawn?] */
+    uint8_t _unknown_3DC[12];
+    uint32_t zone7_type;                         /* +0x3E8 interact zone 7: what using it does (19 enters a seat, 9 a supply rack, 0 none) (unverified) [respawn?] */
+    uint8_t _unknown_3EC[100];
+} HfInteractable;
+HF_ASSERT_SIZE(HfInteractable, 1104);
+HF_ASSERT_OFFSET(HfInteractable, zone0_radius, 12);
+#define HF_TYPE_Interactable_zone0_radius HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone0_joint, 20);
+#define HF_TYPE_Interactable_zone0_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone0_offset_x, 24);
+#define HF_TYPE_Interactable_zone0_offset_x HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone0_offset_y, 28);
+#define HF_TYPE_Interactable_zone0_offset_y HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone0_offset_z, 32);
+#define HF_TYPE_Interactable_zone0_offset_z HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone0_type, 48);
+#define HF_TYPE_Interactable_zone0_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone1_radius, 148);
+#define HF_TYPE_Interactable_zone1_radius HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone1_joint, 156);
+#define HF_TYPE_Interactable_zone1_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone1_offset_x, 160);
+#define HF_TYPE_Interactable_zone1_offset_x HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone1_offset_y, 164);
+#define HF_TYPE_Interactable_zone1_offset_y HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone1_offset_z, 168);
+#define HF_TYPE_Interactable_zone1_offset_z HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone1_type, 184);
+#define HF_TYPE_Interactable_zone1_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone2_radius, 284);
+#define HF_TYPE_Interactable_zone2_radius HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone2_joint, 292);
+#define HF_TYPE_Interactable_zone2_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone2_offset_x, 296);
+#define HF_TYPE_Interactable_zone2_offset_x HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone2_offset_y, 300);
+#define HF_TYPE_Interactable_zone2_offset_y HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone2_offset_z, 304);
+#define HF_TYPE_Interactable_zone2_offset_z HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone2_type, 320);
+#define HF_TYPE_Interactable_zone2_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone3_radius, 420);
+#define HF_TYPE_Interactable_zone3_radius HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone3_joint, 428);
+#define HF_TYPE_Interactable_zone3_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone3_offset_x, 432);
+#define HF_TYPE_Interactable_zone3_offset_x HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone3_offset_y, 436);
+#define HF_TYPE_Interactable_zone3_offset_y HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone3_offset_z, 440);
+#define HF_TYPE_Interactable_zone3_offset_z HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone3_type, 456);
+#define HF_TYPE_Interactable_zone3_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone4_radius, 556);
+#define HF_TYPE_Interactable_zone4_radius HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone4_joint, 564);
+#define HF_TYPE_Interactable_zone4_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone4_offset_x, 568);
+#define HF_TYPE_Interactable_zone4_offset_x HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone4_offset_y, 572);
+#define HF_TYPE_Interactable_zone4_offset_y HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone4_offset_z, 576);
+#define HF_TYPE_Interactable_zone4_offset_z HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone4_type, 592);
+#define HF_TYPE_Interactable_zone4_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone5_radius, 692);
+#define HF_TYPE_Interactable_zone5_radius HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone5_joint, 700);
+#define HF_TYPE_Interactable_zone5_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone5_offset_x, 704);
+#define HF_TYPE_Interactable_zone5_offset_x HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone5_offset_y, 708);
+#define HF_TYPE_Interactable_zone5_offset_y HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone5_offset_z, 712);
+#define HF_TYPE_Interactable_zone5_offset_z HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone5_type, 728);
+#define HF_TYPE_Interactable_zone5_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone6_radius, 828);
+#define HF_TYPE_Interactable_zone6_radius HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone6_joint, 836);
+#define HF_TYPE_Interactable_zone6_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone6_offset_x, 840);
+#define HF_TYPE_Interactable_zone6_offset_x HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone6_offset_y, 844);
+#define HF_TYPE_Interactable_zone6_offset_y HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone6_offset_z, 848);
+#define HF_TYPE_Interactable_zone6_offset_z HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone6_type, 864);
+#define HF_TYPE_Interactable_zone6_type HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone7_radius, 964);
+#define HF_TYPE_Interactable_zone7_radius HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone7_joint, 972);
+#define HF_TYPE_Interactable_zone7_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfInteractable, zone7_offset_x, 976);
+#define HF_TYPE_Interactable_zone7_offset_x HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone7_offset_y, 980);
+#define HF_TYPE_Interactable_zone7_offset_y HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone7_offset_z, 984);
+#define HF_TYPE_Interactable_zone7_offset_z HF_TYPE_F32
+HF_ASSERT_OFFSET(HfInteractable, zone7_type, 1000);
+#define HF_TYPE_Interactable_zone7_type HF_TYPE_U32
+
+/* VehicleComponentData (component 91, 3704-byte records): a vehicle: its states, 32 WheelInfo records of 0x40 from +0x8 (which joints each physics wheel drives), effects and HUD */
+#define HfVehicle_INFO "VehicleComponentData", 25480438u
+typedef struct HfVehicle
+{
+    uint8_t _unknown_00[24];
+    uint32_t wheel0_joint_a;                     /* +0x18 physics wheel 0: a joint hash the wheel names first (one per wheel on the FRV; meaning unproven) (unverified) [respawn?] */
+    uint32_t wheel0_steering_joint;              /* +0x1C physics wheel 0: the joint the wheel steers (FRV front wheels: l_front_steering, r_front_steering; 0 on the rear) (unverified) [respawn?] */
+    uint32_t wheel0_rotation_joint;              /* +0x20 physics wheel 0: the joint the wheel spins (FRV: l_rear_rotation ...) (unverified) [respawn?] */
+    uint32_t wheel0_joint_d;                     /* +0x24 physics wheel 0: a fourth joint hash per wheel (meaning unproven) (unverified) [respawn?] */
+    uint8_t _unknown_28[48];
+    uint32_t wheel1_joint_a;                     /* +0x58 physics wheel 1: a joint hash the wheel names first (one per wheel on the FRV; meaning unproven) (unverified) [respawn?] */
+    uint32_t wheel1_steering_joint;              /* +0x5C physics wheel 1: the joint the wheel steers (FRV front wheels: l_front_steering, r_front_steering; 0 on the rear) (unverified) [respawn?] */
+    uint32_t wheel1_rotation_joint;              /* +0x60 physics wheel 1: the joint the wheel spins (FRV: l_rear_rotation ...) (unverified) [respawn?] */
+    uint32_t wheel1_joint_d;                     /* +0x64 physics wheel 1: a fourth joint hash per wheel (meaning unproven) (unverified) [respawn?] */
+    uint8_t _unknown_68[48];
+    uint32_t wheel2_joint_a;                     /* +0x98 physics wheel 2: a joint hash the wheel names first (one per wheel on the FRV; meaning unproven) (unverified) [respawn?] */
+    uint32_t wheel2_steering_joint;              /* +0x9C physics wheel 2: the joint the wheel steers (FRV front wheels: l_front_steering, r_front_steering; 0 on the rear) (unverified) [respawn?] */
+    uint32_t wheel2_rotation_joint;              /* +0xA0 physics wheel 2: the joint the wheel spins (FRV: l_rear_rotation ...) (unverified) [respawn?] */
+    uint32_t wheel2_joint_d;                     /* +0xA4 physics wheel 2: a fourth joint hash per wheel (meaning unproven) (unverified) [respawn?] */
+    uint8_t _unknown_A8[48];
+    uint32_t wheel3_joint_a;                     /* +0xD8 physics wheel 3: a joint hash the wheel names first (one per wheel on the FRV; meaning unproven) (unverified) [respawn?] */
+    uint32_t wheel3_steering_joint;              /* +0xDC physics wheel 3: the joint the wheel steers (FRV front wheels: l_front_steering, r_front_steering; 0 on the rear) (unverified) [respawn?] */
+    uint32_t wheel3_rotation_joint;              /* +0xE0 physics wheel 3: the joint the wheel spins (FRV: l_rear_rotation ...) (unverified) [respawn?] */
+    uint32_t wheel3_joint_d;                     /* +0xE4 physics wheel 3: a fourth joint hash per wheel (meaning unproven) (unverified) [respawn?] */
+    uint8_t _unknown_E8[48];
+    uint32_t wheel4_joint_a;                     /* +0x118 physics wheel 4: a joint hash the wheel names first (one per wheel on the FRV; meaning unproven) (unverified) [respawn?] */
+    uint32_t wheel4_steering_joint;              /* +0x11C physics wheel 4: the joint the wheel steers (FRV front wheels: l_front_steering, r_front_steering; 0 on the rear) (unverified) [respawn?] */
+    uint32_t wheel4_rotation_joint;              /* +0x120 physics wheel 4: the joint the wheel spins (FRV: l_rear_rotation ...) (unverified) [respawn?] */
+    uint32_t wheel4_joint_d;                     /* +0x124 physics wheel 4: a fourth joint hash per wheel (meaning unproven) (unverified) [respawn?] */
+    uint8_t _unknown_128[48];
+    uint32_t wheel5_joint_a;                     /* +0x158 physics wheel 5: a joint hash the wheel names first (one per wheel on the FRV; meaning unproven) (unverified) [respawn?] */
+    uint32_t wheel5_steering_joint;              /* +0x15C physics wheel 5: the joint the wheel steers (FRV front wheels: l_front_steering, r_front_steering; 0 on the rear) (unverified) [respawn?] */
+    uint32_t wheel5_rotation_joint;              /* +0x160 physics wheel 5: the joint the wheel spins (FRV: l_rear_rotation ...) (unverified) [respawn?] */
+    uint32_t wheel5_joint_d;                     /* +0x164 physics wheel 5: a fourth joint hash per wheel (meaning unproven) (unverified) [respawn?] */
+    uint8_t _unknown_168[48];
+    uint32_t wheel6_joint_a;                     /* +0x198 physics wheel 6: a joint hash the wheel names first (one per wheel on the FRV; meaning unproven) (unverified) [respawn?] */
+    uint32_t wheel6_steering_joint;              /* +0x19C physics wheel 6: the joint the wheel steers (FRV front wheels: l_front_steering, r_front_steering; 0 on the rear) (unverified) [respawn?] */
+    uint32_t wheel6_rotation_joint;              /* +0x1A0 physics wheel 6: the joint the wheel spins (FRV: l_rear_rotation ...) (unverified) [respawn?] */
+    uint32_t wheel6_joint_d;                     /* +0x1A4 physics wheel 6: a fourth joint hash per wheel (meaning unproven) (unverified) [respawn?] */
+    uint8_t _unknown_1A8[48];
+    uint32_t wheel7_joint_a;                     /* +0x1D8 physics wheel 7: a joint hash the wheel names first (one per wheel on the FRV; meaning unproven) (unverified) [respawn?] */
+    uint32_t wheel7_steering_joint;              /* +0x1DC physics wheel 7: the joint the wheel steers (FRV front wheels: l_front_steering, r_front_steering; 0 on the rear) (unverified) [respawn?] */
+    uint32_t wheel7_rotation_joint;              /* +0x1E0 physics wheel 7: the joint the wheel spins (FRV: l_rear_rotation ...) (unverified) [respawn?] */
+    uint32_t wheel7_joint_d;                     /* +0x1E4 physics wheel 7: a fourth joint hash per wheel (meaning unproven) (unverified) [respawn?] */
+    uint8_t _unknown_1E8[3216];
+} HfVehicle;
+HF_ASSERT_SIZE(HfVehicle, 3704);
+HF_ASSERT_OFFSET(HfVehicle, wheel0_joint_a, 24);
+#define HF_TYPE_Vehicle_wheel0_joint_a HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel0_steering_joint, 28);
+#define HF_TYPE_Vehicle_wheel0_steering_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel0_rotation_joint, 32);
+#define HF_TYPE_Vehicle_wheel0_rotation_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel0_joint_d, 36);
+#define HF_TYPE_Vehicle_wheel0_joint_d HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel1_joint_a, 88);
+#define HF_TYPE_Vehicle_wheel1_joint_a HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel1_steering_joint, 92);
+#define HF_TYPE_Vehicle_wheel1_steering_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel1_rotation_joint, 96);
+#define HF_TYPE_Vehicle_wheel1_rotation_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel1_joint_d, 100);
+#define HF_TYPE_Vehicle_wheel1_joint_d HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel2_joint_a, 152);
+#define HF_TYPE_Vehicle_wheel2_joint_a HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel2_steering_joint, 156);
+#define HF_TYPE_Vehicle_wheel2_steering_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel2_rotation_joint, 160);
+#define HF_TYPE_Vehicle_wheel2_rotation_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel2_joint_d, 164);
+#define HF_TYPE_Vehicle_wheel2_joint_d HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel3_joint_a, 216);
+#define HF_TYPE_Vehicle_wheel3_joint_a HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel3_steering_joint, 220);
+#define HF_TYPE_Vehicle_wheel3_steering_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel3_rotation_joint, 224);
+#define HF_TYPE_Vehicle_wheel3_rotation_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel3_joint_d, 228);
+#define HF_TYPE_Vehicle_wheel3_joint_d HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel4_joint_a, 280);
+#define HF_TYPE_Vehicle_wheel4_joint_a HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel4_steering_joint, 284);
+#define HF_TYPE_Vehicle_wheel4_steering_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel4_rotation_joint, 288);
+#define HF_TYPE_Vehicle_wheel4_rotation_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel4_joint_d, 292);
+#define HF_TYPE_Vehicle_wheel4_joint_d HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel5_joint_a, 344);
+#define HF_TYPE_Vehicle_wheel5_joint_a HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel5_steering_joint, 348);
+#define HF_TYPE_Vehicle_wheel5_steering_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel5_rotation_joint, 352);
+#define HF_TYPE_Vehicle_wheel5_rotation_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel5_joint_d, 356);
+#define HF_TYPE_Vehicle_wheel5_joint_d HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel6_joint_a, 408);
+#define HF_TYPE_Vehicle_wheel6_joint_a HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel6_steering_joint, 412);
+#define HF_TYPE_Vehicle_wheel6_steering_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel6_rotation_joint, 416);
+#define HF_TYPE_Vehicle_wheel6_rotation_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel6_joint_d, 420);
+#define HF_TYPE_Vehicle_wheel6_joint_d HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel7_joint_a, 472);
+#define HF_TYPE_Vehicle_wheel7_joint_a HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel7_steering_joint, 476);
+#define HF_TYPE_Vehicle_wheel7_steering_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel7_rotation_joint, 480);
+#define HF_TYPE_Vehicle_wheel7_rotation_joint HF_TYPE_U32
+HF_ASSERT_OFFSET(HfVehicle, wheel7_joint_d, 484);
+#define HF_TYPE_Vehicle_wheel7_joint_d HF_TYPE_U32
+
 #pragma pack(pop)
 
 #endif

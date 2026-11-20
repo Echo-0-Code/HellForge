@@ -77,6 +77,9 @@ EXTRA = {
                                       'indices': 14, 'records': 7, 'record_offset': 224, 'stride': 20, 'type': 2355071671},
     'BugholeComponentData': {'offset': 7710424, 'header': 'f3b10f174c444c4401000000f3b10f17900000000100000000000000', 'index': 216,
                              'indices': 4, 'records': 2, 'record_offset': 64, 'stride': 40, 'type': 386904563},
+    # Vehicles' interact zones (their seats), found the same way.
+    'InteractableComponentData': {'offset': 26651752, 'header': 'db29cafc4c444c4401000000db29cafcb0a709000100000000000000', 'index': 244,
+                                  'indices': 1114, 'records': 557, 'record_offset': 17824, 'stride': 1104, 'type': 4241107419},
     # The same way: the enemy components the editor's enemy combat rows edit (scripts/ExportEnemyCombat.py).
     'AiEnemyComponentData': {'offset': 30027352, 'header': 'b5ef0e9d4c444c4401000000b5ef0e9d88d701000100000000000000', 'index': 302,
                              'indices': 316, 'records': 158, 'record_offset': 5056, 'stride': 732, 'type': 2635001781},
