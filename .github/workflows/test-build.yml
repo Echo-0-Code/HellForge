@@ -1,10 +1,10 @@
-# Echo-0-Code's test builds of the feature/camo-layers branch and the combined test branch: the package, as the nightly builds it, for a
-# tester to install. Only on those branches; it goes before their pull requests.
+# Echo-0-Code's test builds of the fork's dev branch (the always up-to-date testing branch): the package, as the nightly
+# builds it, for a tester to install. Upstream's nightly does not run on a fork, so this one builds each push to dev.
 name: Test build
 
 on:
   push:
-    branches: [feature/camo-layers, test/combined-camo-vehicles-paints]
+    branches: [dev]
   workflow_dispatch:
 
 jobs:
