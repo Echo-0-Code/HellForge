@@ -5287,6 +5287,7 @@ int main(int argc, char** argv)
     }
     StratagemCategoriesFixture();
     VanillaStratagemPlacementFixture();
+    NamedStratagemPlacementFixture();
     LoadoutPreviewFixture();
     FieldWatchClaimFixture();
     FieldWatchOffFixture();
