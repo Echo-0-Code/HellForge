@@ -407,7 +407,7 @@ On `dev`, since 0.4.0-beta.
 ### Fixed
 
 - **A crash opening a weapon's customize screen.** A card left with no item or type, as can happen right after the
-  Armory unloads packages, is skipped where it is drawn and sorted last, instead of crashing the game.
+  Armory unloads packages, is skipped where it is drawn and sorted last, instead of crashing the game (#27).
 - **Copies of a secondary share one paint record.** Several mods' copies of one secondary, such as three of the P-11,
   each get a customization record of their own. They shared the base's record and its package, and lost CUSTOMIZE (#24).
 - **An open modal screen draws over every other mod's screens.** A button another mod added later drew over an open
