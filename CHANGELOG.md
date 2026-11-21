@@ -575,6 +575,11 @@ On `dev`, since 0.4.0-beta.
 
 ### For mod makers
 
+- **SDK 23: the whole stratagem selection screen.** `place_stratagem` lists a vanilla stratagem under a mod's
+  heading, in any order, and a vanilla heading left empty is hidden, so a mod can replace Offensive, Supply and
+  Defensive with headings of its own. `set_stratagem_icon` gives a vanilla stratagem a mod's icon without replacing
+  the game's icon textures ([vanilla stratagems under your headings](docs/modding/content.md#vanilla-stratagems-under-your-headings)).
+  The launcher now accepts mods that need SDK 22 and 23.
 - **SDK 22: texts of a mod's own.** `add_text` gives a string a text id the game's text lookup answers, for the game's
   widgets that take an id, such as a tab bar's labels ([texts](docs/modding/ui.md#texts-for-the-games-own-widgets)).
 - **`content()` lists weapon patterns.** Mods' `add_pattern` paints come last as `HF_KIND_WEAPON_PATTERN`, with their
