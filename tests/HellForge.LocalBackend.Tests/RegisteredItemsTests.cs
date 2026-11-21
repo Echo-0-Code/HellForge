@@ -215,7 +215,7 @@ static class RegisteredItemsTests
         File.WriteAllText(file, Pack(Moved));
         check(late.Load().Count == before && Served(late, "/Progression/items").Count > RegisteredItems.CatalogueCap, "A loader's word that comes later counts.");
     }
-    // A vanilla secondary the loader gave a paint package (registry_load.c PaintSecondaries, "paintItems"), the P-11 Stim
+    // A vanilla secondary the loader gave a paint package (registry_paints.c PaintWeapons, "paintItems"), the P-11 Stim
     // Pistol, and a mod's copy of it: each gets the 12 game paints as children in its run, its paint package with them
     // as level 1 rewards and nothing else, that package at level 1, and the paints held with the weapon. A mod pattern
     // copying a game paint goes on them too.

@@ -16,6 +16,8 @@ On `dev`, since 0.4.0-beta.
   game's 12 paints, and takes mods' weapon patterns ([patterns](docs/modding/patterns.md#where-it-shows)). Its
   package offers the Default paint as a free unlockable, because the Armory shows CUSTOMIZE only for a package with
   one. The Armory still offers the button on primaries alone; a mod can lift that check.
+- **Paints on support weapons.** Support weapons, the game's and mods' copies of them, get the same paint package as
+  secondaries. The Armory lists no support weapons, so a mod must show them for the customize screen to be reached.
 - **Paints on more weapon bodies.** A unit `edit` with `slots` renames a game unit's material slots, so a support
   weapon whose body has a slot of its own, such as the Stalwart, takes the game's paints on `m_weapon`
   ([data](docs/modding/data.md#edit)).
@@ -404,6 +406,8 @@ On `dev`, since 0.4.0-beta.
 
 ### Fixed
 
+- **Copies of a secondary share one paint record.** Several mods' copies of one secondary, such as three of the P-11,
+  each get a customization record of their own. They shared the base's record and its package, and lost CUSTOMIZE.
 - **An open modal screen draws over every other mod's screens.** A button another mod added later drew over an open
   picker.
 - **Every mapped function resolves by name.** The loader kept only the first 512 of the 559 functions mapped for
