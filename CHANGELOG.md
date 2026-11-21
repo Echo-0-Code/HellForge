@@ -16,6 +16,9 @@ On `dev`, since 0.4.0-beta.
   game's 12 paints, and takes mods' weapon patterns ([patterns](docs/modding/patterns.md#where-it-shows)). Its
   package offers the Default paint as a free unlockable, because the Armory shows CUSTOMIZE only for a package with
   one. The Armory still offers the button on primaries alone; a mod can lift that check.
+- **Paints on more weapon bodies.** A unit `edit` with `slots` renames a game unit's material slots, so a support
+  weapon whose body has a slot of its own, such as the Stalwart, takes the game's paints on `m_weapon`
+  ([data](docs/modding/data.md#edit)).
 - **Camouflage shapes of your own.** A data spec can add layers to one of the game's array textures after its own
   (a texture `edit` with `layers`). A LUT cell takes `[r, g, b, a]`, so a weapon paint can pick any camouflage layer,
   the game's or a mod's ([patterns](docs/modding/patterns.md#camouflage-shapes-on-weapons)).
