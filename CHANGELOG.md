@@ -16,7 +16,7 @@ On `dev`, since 0.4.0-beta.
   vanilla ammunition item can load a mod's projectile, magazine size or rate. `HfWeapon.ammunition` gives a weapon a
   default ammunition and opens the slot. `set_weapon_pick` and `weapon_pick` pick an item in a weapon's slot on the
   ship through the game's own call, so the pick is saved and reaches friends with the loadout
-  ([content](docs/modding/content.md#ammunition-of-your-own)).
+  (#30, [content](docs/modding/content.md#ammunition-of-your-own)).
 - **Feed belts and hoses of your own.** A data spec's `model` takes `ragdoll`, a game unit whose ragdoll profile the
   model gets under its own name, so a backpack's chain unit can be a model ([models](docs/modding/models.md)).
 - **Paints on secondaries.** Every secondary, the game's and mods' copies of them, has a customize screen with the
