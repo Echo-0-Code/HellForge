@@ -1731,8 +1731,8 @@ typedef struct HfApi
      * loadout id), in the template the armory shows; 0 for none, or before the game has the player's customizations. */
     uint32_t (*weapon_pick)(HfMod* mod, uint32_t weapon, uint32_t slot);
     /* Puts an item in a weapon's slot as the armory's customize screen does: saved with the player's customizations
-     * and sent with the loadout, so friends' games build the weapon alike. Only on the ship: refused in a mission or
-     * while one loads. The item must be for that slot, and an attachment must be offered on the weapon. Made on the
+     * and sent with the loadout, so friends' games build the weapon alike. Any time: in a mission, the weapon in hand
+     * is not rebuilt; the pick shows when the game next builds it. The item must be for that slot, and an attachment must be offered on the weapon. Made on the
      * game thread: weapon_pick shows it a frame later. 0 queued, 1 refused (the mod's log says why). */
     int (*set_weapon_pick)(HfMod* mod, uint32_t weapon, uint32_t slot, uint32_t item);
 } HfApi;

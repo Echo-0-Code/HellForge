@@ -32,8 +32,8 @@ templates of ten picks, one for each slot number.
 
 - `set_weapon_pick` only queues a request. The game thread makes it through EquipCustomizationItem, so the pick takes
   the game's own path to the save and the loadout.
-- A request is refused in a mission or while one loads, and one still queued when the ship is left is dropped. A
-  weapon in use never changes under the player.
+- Requests are taken in any game state. EquipCustomizationItem itself does not check the state; in a mission it
+  changes the saved pick and the loadout, not the weapon already built.
 - EquipCustomizationItem's first bytes are pinned; with other bytes the calls stay off and the log says so.
 - A weapon with no template yet (the game's defaults, -1) gets the pick in its first template.
 

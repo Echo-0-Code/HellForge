@@ -5,8 +5,8 @@
  * (0x1493770, 0x1494590). EquipCustomizationItem (0x1035370: store, weapon, item, slot, template, refresh UI) is what
  * the screen calls: it stores the pick, and for an entry in state 0 or 1 copies the weapon's picks into the local
  * player's loadout and sends it (0x1034180), which is how a friend's game builds the weapon alike. Calling it from the
- * game thread keeps it the game's own path; a pick made in a mission or while one loads is refused, so a weapon in use
- * never changes under the player. */
+ * game thread keeps it the game's own path. It does not check the game's state, so neither do we: a mod that wants
+ * picks in the lobby only checks game_state itself. */
 
 #define WP_MANAGER 0x347CEF8u
 #define WP_STORE 0x178A4ECu
@@ -28,8 +28,6 @@ typedef struct WpRequest { HfMod* mod; uint32_t weapon, slot, item; } WpRequest;
 static WpRequest g_wpQueue[WP_QUEUE];
 static int g_wpQueued;
 static SRWLOCK g_wpLock = SRWLOCK_INIT;
-
-static uint32_t ReadState(uintptr_t game); /* event_sources.c */
 
 /* The manager's entry of a weapon, or NULL (no manager yet, or the weapon has none). */
 static uint8_t* WpEntry(uintptr_t game, uint32_t weapon)
@@ -84,9 +82,7 @@ static int ApiSetWeaponPick(HfMod* mod, uint32_t weapon, uint32_t slot, uint32_t
 {
     uintptr_t game = g_game;
     const char* why = NULL;
-    uint32_t state = ReadState(game);
     if (game == 0 || g_wpEquip == NULL) why = "the game's customization manager is not the reviewed one, or not loaded yet";
-    else if (state != HF_STATE_SHIP) why = "picks are made on the ship, not in a mission or while one loads";
     else if (slot == 0 || slot >= WP_SLOTS) why = "slots are 1 to 9";
     else if (WpEntry(game, weapon) == NULL) why = "the game has no customization entry for this weapon";
     else why = WpItemWhy(game, weapon, slot, item);
@@ -111,7 +107,7 @@ static void WpProve(uintptr_t game)
     else if (g_wpEquip == NULL) Note("weapon picks: the game's EquipCustomizationItem is not the reviewed one; set_weapon_pick is off");
 }
 
-/* On the game thread: the waiting picks, through the game's own call, while still on the ship. */
+/* On the game thread: the waiting picks, through the game's own call. */
 static void WeaponPicksTick(uintptr_t game)
 {
     WpProve(game);
@@ -125,8 +121,8 @@ static void WeaponPicksTick(uintptr_t game)
     {
         WpRequest* r = &todo[i];
         uint8_t* entry = WpEntry(game, r->weapon);
-        if (ReadState(game) != HF_STATE_SHIP || entry == NULL || g_wpEquip == NULL)
-        { ApiLog(r->mod, "set_weapon_pick(%08x, slot %u, %08x): dropped, the ship was left first", r->weapon, r->slot, r->item); continue; }
+        if (entry == NULL || g_wpEquip == NULL)
+        { ApiLog(r->mod, "set_weapon_pick(%08x, slot %u, %08x): dropped, the weapon's entry is gone", r->weapon, r->slot, r->item); continue; }
         uint32_t t = WpTemplate(entry), shown;
         memcpy(&shown, entry + 8, 4);
         g_wpEquip(*(uint8_t**)(game + WP_MANAGER) + WP_STORE, r->weapon, r->item, r->slot, t, 1);

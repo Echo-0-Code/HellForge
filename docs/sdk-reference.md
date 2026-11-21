@@ -245,7 +245,7 @@ for changing and adding content; [Hooks and game memory](modding/hooks.md) for `
 ### SDK 25: a weapon's customization picks (docs/modding/content.md; check hf->size)
 
 - `weapon_pick`: `uint32_t (HfMod* mod, uint32_t weapon, uint32_t slot)`. The item the player has in a slot (1 to 9: 2 optic, 4 muzzle, 5 magazine, 6 ammunition...) of a weapon (its loadout id), in the template the armory shows; 0 for none, or before the game has the player's customizations.
-- `set_weapon_pick`: `int (HfMod* mod, uint32_t weapon, uint32_t slot, uint32_t item)`. Puts an item in a weapon's slot as the armory's customize screen does: saved with the player's customizations and sent with the loadout, so friends' games build the weapon alike. Only on the ship: refused in a mission or while one loads. The item must be for that slot, and an attachment must be offered on the weapon. Made on the game thread: weapon_pick shows it a frame later. 0 queued, 1 refused (the mod's log says why).
+- `set_weapon_pick`: `int (HfMod* mod, uint32_t weapon, uint32_t slot, uint32_t item)`. Puts an item in a weapon's slot as the armory's customize screen does: saved with the player's customizations and sent with the loadout, so friends' games build the weapon alike. Any time: in a mission, the weapon in hand is not rebuilt; the pick shows when the game next builds it. The item must be for that slot, and an attachment must be offered on the weapon. Made on the game thread: weapon_pick shows it a frame later. 0 queued, 1 refused (the mod's log says why).
 
 ## Functions
 

@@ -414,12 +414,13 @@ types of its own from them and let players pick one in its own screen (SDK 25):
 
 2. Give the weapon its default: `HfWeapon.ammunition` is an item id, such as your standard copy's. It becomes the
    weapon's default in slot 6, and slot 6 becomes one the player may change.
-3. Pick on the ship: `hf->set_weapon_pick(mod, weapon, 6, item)` puts the item in the slot, as the Armory's customize
+3. Pick: `hf->set_weapon_pick(mod, weapon, 6, item)` puts the item in the slot, as the Armory's customize
    screen does for the others. `hf->weapon_pick(mod, weapon, 6)` reads the pick back.
 
 - A pick is saved with the player's customizations and sent with the loadout. A friend's game builds the weapon with
   the same item, so the same projectile, as long as both have the mod.
-- Picks are made on the ship only. `set_weapon_pick` refuses one in a mission or while one loads, and the log says why.
+- A pick can be made at any time. In a mission the weapon in hand is not rebuilt: the pick shows when the game next
+  builds it. A mod that wants picks in the lobby only checks `game_state` first.
 - An item must be for the slot it goes in, and an attachment must be offered on the weapon.
 - Its delta sets the projectile when the weapon is built, over `HfWeapon.projectile`. A weapon with a projectile and no
   ammunition has none, as before.

@@ -45,12 +45,10 @@ static void WeaponPicksFixture(void)
     /* reads: the template shown, the first for a weapon the game never customized, 0 for an unknown one */
     assert(ApiWeaponPick(mod, worn, 6) == picked && ApiWeaponPick(mod, fresh, 6) == 0 && ApiWeaponPick(mod, 0x2222u, 6) == 0);
     assert(ApiWeaponPick(mod, worn, WP_SLOTS) == 0);
-    /* refusals: another slot's item, slot 0, an unknown weapon or item, and anything in a mission */
+    /* refusals: another slot's item, slot 0, an unknown weapon or item */
     assert(ApiSetWeaponPick(mod, fresh, 6, magazine) == 1 && ApiSetWeaponPick(mod, fresh, 0, ammo) == 1);
     assert(ApiSetWeaponPick(mod, 0x2222u, 6, ammo) == 1 && ApiSetWeaponPick(mod, fresh, 6, 0x12345678u) == 1);
-    memcpy(gameState + EVT_STATE_AT, &mission, 4);
-    assert(ApiSetWeaponPick(mod, fresh, 6, ammo) == 1 && g_wpQueued == 0);
-    memcpy(gameState + EVT_STATE_AT, &ship, 4);
+    assert(g_wpQueued == 0);
     /* a mod's attachment only on the weapons it is offered on */
     int savedCount = g_attachmentCount;
     memset(&g_attachments[0], 0, sizeof g_attachments[0]);
@@ -59,17 +57,17 @@ static void WeaponPicksFixture(void)
     g_attachmentCount = 1;
     assert(ApiSetWeaponPick(mod, worn, 6, 0xA77AC4EDu) == 1);
 
-    /* on the ship: queued, then made on the game thread through the game's call, in the template shown */
+    /* queued, then made on the game thread through the game's call, in the template shown */
     assert(ApiSetWeaponPick(mod, fresh, 6, 0xA77AC4EDu) == 0 && ApiSetWeaponPick(mod, worn, 6, ammo) == 0 && g_wpQueued == 2);
     assert(g_wpCall.calls == 0);
     WeaponPicksTick((uintptr_t)game);
     assert(g_wpQueued == 0 && g_wpCall.calls == 2 && g_wpCall.store == store && g_wpCall.weapon == worn && g_wpCall.item == ammo &&
         g_wpCall.slot == 6 && g_wpCall.pickTemplate == 1 && g_wpCall.refresh == 1);
-    /* a pick still waiting when a mission starts is dropped */
-    assert(ApiSetWeaponPick(mod, fresh, 6, ammo) == 0);
+    /* in a mission too: the game's call does not check the state */
     memcpy(gameState + EVT_STATE_AT, &mission, 4);
+    assert(ApiSetWeaponPick(mod, fresh, 6, ammo) == 0);
     WeaponPicksTick((uintptr_t)game);
-    assert(g_wpCall.calls == 2 && g_wpQueued == 0);
+    assert(g_wpCall.calls == 3 && g_wpQueued == 0 && g_wpCall.weapon == fresh && g_wpCall.pickTemplate == 0);
 
     /* a mod weapon's ammunition: the default in slot 6 and a slot the player may change, once; no room, nothing */
     static uint8_t record[REG_SLOTS_AT + 40];
