@@ -1222,3 +1222,5 @@ static void* ApiRecord(HfMod* mod, HfRef entity, const char* component, uint32_t
     }
     return record;
 }
+
+#include "attachment_sets.c" /* an attachment's own values, checked as named fields */
