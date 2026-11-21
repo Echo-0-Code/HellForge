@@ -70,9 +70,10 @@ public sealed record TextureResource(string Where, string Name, IReadOnlyList<st
 // the unit copy named Unit in the same patch, which then uses them.
 public sealed record AnimationsResource(string Where, string File, string Unit) : DataResource(Where);
 // A unit of the mod's own from a glTF model (ModelUnit): materials by the model's material names, LOD sizes (null: the
-// weapons' own), and optionally a game unit whose physics it takes under its name and one whose animations it plays.
+// weapons' own), and optionally a game unit whose physics it takes under its name, one whose animations it plays and one
+// whose ragdoll profile it takes under its name.
 public sealed record ModelResource(string Where, string Name, string File, IReadOnlyDictionary<string, ulong> Materials, IReadOnlyList<double>? LodSizes,
-    ulong? Physics, ulong? AnimationsFrom) : DataResource(Where);
+    ulong? Physics, ulong? AnimationsFrom, ulong? Ragdoll = null) : DataResource(Where);
 // A sound bank of the mod's own: its events from WAVs in the mod folder, under a copy of a game bank's root mixer.
 public sealed record SoundsResource(string Where, string Name, IReadOnlyList<SoundFile> Sounds, ulong MixerBank, uint Mixer) : DataResource(Where);
 public sealed record SoundFile(string Event, string Wav, double Gain);
@@ -324,7 +325,7 @@ public static partial class DataSpecs
 
     static ModelResource ReadModel(JsonElement e, string at, string? folder, ISet<string> inputs)
     {
-        Fields(e, at, "model", "name", "materials", "lods", "physics", "animationsFrom");
+        Fields(e, at, "model", "name", "materials", "lods", "physics", "animationsFrom", "ragdoll");
         var file = Text(e, "model", at).Replace('\\', '/');
         if (!InModFolder(file) || !(file.EndsWith(".glb", StringComparison.OrdinalIgnoreCase) || file.EndsWith(".gltf", StringComparison.OrdinalIgnoreCase)))
             throw new InvalidDataException($"{at}: model is a .glb or .gltf file in the mod folder, such as \"models/rifle.glb\".");
@@ -337,7 +338,8 @@ public static partial class DataSpecs
             : throw new InvalidDataException($"{at}: lods are the share of the screen at which each LOD starts, such as [1, 0.5, 0.25].")).ToList() : null;
         ulong? physics = e.TryGetProperty("physics", out var p) ? Id(p, $"{at}.physics") : null;
         ulong? animations = e.TryGetProperty("animationsFrom", out var a) ? Id(a, $"{at}.animationsFrom") : null;
-        return new ModelResource(at, Name(e, at), file, materials, lods, physics, animations);
+        ulong? ragdoll = e.TryGetProperty("ragdoll", out var r) ? Id(r, $"{at}.ragdoll") : null;
+        return new ModelResource(at, Name(e, at), file, materials, lods, physics, animations, ragdoll);
     }
 
     // A path in the mod folder: relative, without . or .. parts.

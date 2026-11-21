@@ -209,6 +209,12 @@ public static class ModDataBuilder
             var key = new ResourceKey(ResourceTypes.Unit, Hash(model.Name));
             AddResource(resources, model.Where, key, BuildModel(model, modFolder, model.AnimationsFrom is { } of ? (Read(new(ResourceTypes.Unit, of), "game").Main, Read(new(ResourceTypes.Hash("bones"), of), "game").Main) : null));
             added.Add(key);
+            if (model.Ragdoll is { } ragdollOf)
+            {
+                var ownRagdoll = new ResourceKey(ResourceTypes.RagdollProfile, key.Name);
+                AddResource(resources, model.Where, ownRagdoll, RenameRagdoll(Read(new(ResourceTypes.RagdollProfile, ragdollOf), "game"), ragdollOf, key.Name, model.Where));
+                added.Add(ownRagdoll);
+            }
             if (model.Physics is not { } from) return;
             var physics = new ResourceKey(ResourceTypes.Physics, from);
             if (!Has(physics, "game")) throw new InvalidDataException($"{model.Where}: unit 0x{from:X16} has no physics in the game data.");
@@ -296,6 +302,7 @@ public static class ModDataBuilder
     static IEnumerable<ResourceKey> ModelSources(ModelResource model)
     {
         if (model.Physics is { } physics) yield return new(ResourceTypes.Physics, physics);
+        if (model.Ragdoll is { } ragdoll) yield return new(ResourceTypes.RagdollProfile, ragdoll);
         if (model.AnimationsFrom is not { } of) yield break;
         yield return new(ResourceTypes.Unit, of);
         yield return new(ResourceTypes.Hash("bones"), of);
@@ -359,6 +366,18 @@ public static class ModDataBuilder
 
     // A unit's physics for its copy: the copy's name where the base's stands (a sentry with the base's name there gets no
     // bodies at all: no aim, and a default field for collision).
+    // A ragdoll profile names its unit after its type and again in its header and in each body (the Maxigun's feed belt:
+    // 16 times), and the engine pairs them by that name. Every aligned copy of the name becomes the model's.
+    static ResourceParts RenameRagdoll(ResourceParts source, ulong from, ulong to, string where)
+    {
+        var main = source.Main.ToArray();
+        if (main.Length < 0x30 || BitConverter.ToUInt64(main, 0) != ResourceTypes.RagdollProfile || BitConverter.ToUInt64(main, 0x08) != from)
+            throw new InvalidDataException($"{where}: the ragdoll profile of 0x{from:X16} is not laid out as reviewed (type, then its unit's name).");
+        for (var at = 0; at + 8 <= main.Length; at += 8)
+            if (BitConverter.ToUInt64(main, at) == from) BitConverter.TryWriteBytes(main.AsSpan(at), to);
+        return new(main, source.Gpu, source.Stream);
+    }
+
     static ResourceParts RenamePhysics(ResourceParts source, ulong from, ulong to)
     {
         var main = source.Main.ToArray();

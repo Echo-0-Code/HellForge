@@ -12,6 +12,8 @@ On `dev`, since 0.4.0-beta.
 
 ### Added
 
+- **Feed belts and hoses of your own.** A data spec's `model` takes `ragdoll`, a game unit whose ragdoll profile the
+  model gets under its own name, so a backpack's chain unit can be a model ([models](docs/modding/models.md)).
 - **Paints on secondaries.** Every secondary, the game's and mods' copies of them, has a customize screen with the
   game's 12 paints, and takes mods' weapon patterns ([patterns](docs/modding/patterns.md#where-it-shows)). Its
   package offers the Default paint as a free unlockable, because the Armory shows CUSTOMIZE only for a package with

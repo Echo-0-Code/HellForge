@@ -31,6 +31,7 @@ No game model is copied. This page lists what HellForge reads from the file and 
 | `lods` | the share of the screen at which each LOD starts, such as `[1, 0.5, 0.25]`; default the weapons' own |
 | `physics` | a game unit whose physics (collision) the unit takes under its own name |
 | `animationsFrom` | a game unit whose animations the unit plays |
+| `ragdoll` | a game unit whose ragdoll profile the unit takes under its own name |
 
 The file is part of the spec, so changing it rebuilds the data and changes the modlist code. HellForge writes the
 whole unit itself, so mod sync treats it as content ([data specs](data.md#data-specs)). A weapon names the unit in its
@@ -99,6 +100,11 @@ body. For a weapon, name its base weapon's unit.
 whole local transform, not an offset from rest. So every joint those animations move must be a joint of your model,
 with the same name and the same rest transform, or the build is refused with the joint named. Joints they do not move
 can be anything.
+
+`ragdoll` gives the unit a game unit's ragdoll profile, the physics bodies a chain or hose hangs from. The bodies
+follow joints by name, so the model needs the same joints, at the same rest poses. A backpack's feed belt
+(`TwoPointChainComponentData`) is such a unit: the Maxigun's belt is `0x9BA9F700137C6325`, with joints `boss`,
+`chain_01` to `chain_12` and `end`. Give a belt of your own `"ragdoll"` and `"animationsFrom"` that unit.
 
 ## Limits
 

@@ -861,6 +861,17 @@ static class DataBuilderTests
             catch (InvalidDataException error) { check(error.Message.Contains("models/gun.glb") && error.Message.Contains("Body"), "The mistake is not named: " + error.Message); }
             try { ModDataBuilder.Build(Spec(model.Replace("0x3333", "0x4444")), mod, gameReader, output + "3"); throw new Exception("Built without physics."); }
             catch (InvalidDataException error) { check(error.Message.Contains("has no physics"), "Refused for another reason: " + error.Message); }
+
+            var withRagdoll = Spec(model.Replace("\"physics\":\"0x3333\"", "\"ragdoll\":\"0x3333\""));
+            check(withRagdoll.Patches[0].Resources[0] is ModelResource { Ragdoll: 0x3333, Physics: null }, "The model's ragdoll is not read.");
+            ModDataBuilder.Build(withRagdoll, mod, gameReader, output + "4");
+            var ragdolled = ResourceArchive.Read(File.ReadAllBytes(Path.Combine(output + "4", "1111111111111111.patch_0")),
+                File.ReadAllBytes(Path.Combine(output + "4", "1111111111111111.patch_0.gpu_resources")), []);
+            var profile = ragdolled[new(ResourceTypes.RagdollProfile, name)].Main;
+            check(new[] { 0x08, 0x28, 0x60 }.All(at => BinaryPrimitives.ReadUInt64LittleEndian(profile.AsSpan(at)) == name)
+                && BinaryPrimitives.ReadUInt64LittleEndian(profile.AsSpan(0x6C)) == 0x3333, "The ragdoll profile does not name the model's unit, or an unaligned value changed.");
+            try { ModDataBuilder.Build(Spec(model.Replace("\"physics\":\"0x3333\"", "\"ragdoll\":\"0x4444\"")), mod, gameReader, output + "5"); throw new Exception("Built without the ragdoll."); }
+            catch (InvalidDataException error) { check(error.Message.Contains("not in the game data"), "Refused for another reason: " + error.Message); }
         });
 
         test("Textures build from PNGs in the game's unstreamed form: every format's mip chain, array layers, the category", () =>
@@ -1021,6 +1032,16 @@ static class DataBuilderTests
     // are in one bundle, split into 48-byte chunks (every other LZ4-coded), the archives in two index entries each.
     // A physics resource as the game lays them out: its type, then its unit's name at +0x08 (repeated at +0x38 and
     // +0x40), and a label and bodies after.
+    // A ragdoll profile's layout as the Maxigun belt's: type, name, a header naming it again, then a body naming it.
+    static byte[] Ragdoll(ulong unit)
+    {
+        var main = new byte[0x80];
+        BinaryPrimitives.WriteUInt64LittleEndian(main, ResourceTypes.RagdollProfile);
+        foreach (var at in new[] { 0x08, 0x28, 0x60 }) BinaryPrimitives.WriteUInt64LittleEndian(main.AsSpan(at), unit);
+        BinaryPrimitives.WriteUInt64LittleEndian(main.AsSpan(0x6C), unit); // unaligned: not a name
+        return main;
+    }
+
     static byte[] Physics(ulong unit)
     {
         var main = new byte[0x60];
@@ -1152,6 +1173,7 @@ static class DataBuilderTests
         {
             [new(ResourceTypes.Unit, 0x3333)] = new(unit, Enumerable.Repeat((byte)7, 100).ToArray(), []),
             [new(ResourceTypes.Physics, 0x3333)] = new(Physics(0x3333), [], []),
+            [new(ResourceTypes.RagdollProfile, 0x3333)] = new(Ragdoll(0x3333), [], []),
             [new(ResourceTypes.Material, 0x1111)] = new(Material(0x2222), [], []),
             [new(ResourceTypes.Texture, 0x2222)] = new(IconImage.TextureMain(23, 8, 5, 10), Lut(), []),
             [new(ResourceTypes.Particles, 0x4444)] = new(Floats(curve), [], []),
