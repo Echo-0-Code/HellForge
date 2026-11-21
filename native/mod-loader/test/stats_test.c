@@ -25,6 +25,7 @@
 #include "mod_identity_test.c"
 #include "mod_status_test.c"
 #include "render_guards_test.c"
+#include "customize_guards_test.c"
 #include "overlay_cursor_test.c"
 #include "moved_fields_test.c"
 #include "generation_capacity_test.c"
@@ -5032,6 +5033,7 @@ int main(int argc, char** argv)
     EnemyLimitsFixture();
     EnemyRostersFixture();
     SpawnGuardsFixture();
+    CustomizeGuardsFixture();
     ShotsFixture();
     RoundsFixture();
     DeploysFixture();
