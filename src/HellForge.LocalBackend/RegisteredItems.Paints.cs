@@ -3,10 +3,10 @@ using System.Text.Json.Nodes;
 
 namespace HellForge.LocalBackend;
 
-// Paints on weapons whose base has no mastery package (the secondaries). The customize screen makes its cards only from
-// a weapon's mastery package (game.dll 0x1493770), so the mod loader gives each vanilla secondary a customization record
-// naming PaintPackage(weapon), the paint slot and the Default paint (registry_load.c PaintSecondaries), and lists them
-// in "paintItems". Mods' copies of them inherit that record. For each of these weapons this serves:
+// Paints on weapons whose base has no mastery package (secondaries, support weapons). The customize screen makes its
+// cards only from a weapon's mastery package (game.dll 0x1493770), so the mod loader gives each such vanilla weapon a
+// customization record naming PaintPackage(weapon), the paint slot and the Default paint (registry_paints.c PaintWeapons),
+// and lists them in "paintItems". Mods' copies of them inherit that record. For each of these weapons this serves:
 //   /Progression/items                 the 12 game paints as its children, copies of the Liberator's;
 //   /Progression/ProgressionPackages   PaintPackage(weapon): the Liberator's package with every reward and unlock taken
 //                                      out, the Default paint a free unlockable of level 1 and the others its rewards;
