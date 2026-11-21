@@ -93,6 +93,13 @@ EXTRA = {
                                    'indices': 6, 'records': 3, 'record_offset': 96, 'stride': 136, 'type': 3800371572},
     'TwoPointChainAttachTargetComponentData': {'offset': 27296448, 'header': '50fa02744c444c440100000050fa0274780000000100000000000000',
                                                'index': 251, 'indices': 6, 'records': 3, 'record_offset': 96, 'stride': 8, 'type': 1946352208},
+    # The same way: a vehicle's seat set (its TransitionId picks the game's seat map) and the aim limits of its mounted
+    # guns, so a vehicle copy with seats or guns of its own (own_all) can change its own records. MultiTarget's frame ends
+    # 4 bytes after its last record (padding).
+    'SeatCollectionComponentData': {'offset': 29865184, 'header': '86fcea4a4c444c440100000086fcea4ac06300000100000000000000', 'index': 286,
+                                    'indices': 112, 'records': 56, 'record_offset': 1792, 'stride': 424, 'type': 1256914054},
+    'MultiTargetComponentData': {'offset': 26629592, 'header': '7f55cbb94c444c44010000007f55cbb9005600000100000000000000', 'index': 242,
+                                 'indices': 64, 'records': 33, 'record_offset': 1024, 'stride': 636, 'type': 3117110655},
 }
 for name, c in EXTRA.items():
     components.setdefault(name, c)
